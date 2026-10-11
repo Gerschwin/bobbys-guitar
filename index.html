@@ -233,6 +233,10 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.8.4: Start/Stop stays on screen, just above the tab bar */
+.gobar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
+.gobar .btn.big{min-height:54px}
+#viewPlay{padding-bottom:76px}
 /* v0.8.3: the header slides away while scrolling down and comes back on the way up */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);margin:-12px -16px 0;padding:12px 16px 10px;transition:transform .25s ease}
 .top::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:env(safe-area-inset-top,0px);background:var(--bg)}
@@ -436,7 +440,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     <div class="feed" id="pFeed" aria-live="polite">&nbsp;</div>
     <div class="score" id="pScore"></div>
     <div class="importbar" id="importBar" hidden><span>Add <b id="importName"></b> to your songs?</span><div class="row"><button class="small" id="importAdd">Add it</button><button class="small" id="importNo">No thanks</button></div></div>
-    <button class="btn primary big" id="bGo">Start</button>
+    <div class="gobar"><button class="btn primary big" id="bGo">Start</button></div>
     <div class="seg" id="modeSeg" role="radiogroup" aria-label="How the lane moves">
       <button data-v="wait" role="radio">Wait for me</button><button data-v="keep" role="radio">Keep going</button>
     </div>
@@ -824,7 +828,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.3';
+const APP_VERSION = '0.8.4';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1444,6 +1448,7 @@ function summary(){
 
 async function startPlay(){
   audio();
+  window.scrollTo({top: 0, behavior: 'smooth'});   // chord, lane and the Stop button all in view
   $('bGo').disabled = true;
   try { await openMic(); T.hasMic = true; } catch (e){ T.hasMic = false; }
   Object.assign(T, {running:true, waiting:false, counting:false, anchorBeat:-4, anchorTime:ctx.currentTime + 0.25, nextClick:-4,
