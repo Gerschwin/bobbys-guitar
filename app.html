@@ -1,30 +1,38 @@
 <title>Bobby’s Guitar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: one phone-width column. The chord box is the hero, the play buttons sit under the thumb, the chord shelf is at the bottom. */
+/* "On Tour": a dark stage, gig-poster type (Anton), hot pink and spotlight amber. Daylight mode swaps the tokens.
+   Layout: one phone-width column, a bottom tab bar, the chord box as the hero of the Chords tab. */
 :root{
-  --bg:#E8EDEF; --surface:#FBFCFC; --ink:#16202A; --muted:#566570; --line:#C3CED5;
-  --accent:#0B7A69; --accent-ink:#FFFFFF; --accent-soft:#D2EBE5;
-  --mute:#B4541E; --good:#1E8449; --bad:#B23A2C; --pulse:#E7A33C;
-  --f-display:"Bricolage Grotesque","Avenir Next",system-ui,sans-serif;
-  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:#0F0B16; --surface:#1B1526; --raise:#241C33; --ink:#F5F0FA; --muted:#A89BBA; --line:#2E2540;
+  --accent:#FF4D8D; --accent-ink:#0F0B16; --accent-soft:#3A1F33;
+  --mute:#FFB547; --good:#3EE6C4; --bad:#FF6B6B; --pulse:#FFB547;
+  --cb-bg:transparent; --cb-str:var(--ink); --cb-fret:var(--line); --cb-dot:var(--accent); --cb-dot-ink:var(--accent-ink); --cb-x:var(--pulse); --cb-lbl:var(--muted);
+  --f-display:"Anton","Arial Narrow",Impact,sans-serif;
+  --f-body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark; font-synthesis-weight:none;
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#10161A; --surface:#182026; --ink:#E3EAED; --muted:#93A2AC; --line:#33414A;
-  --accent:#3BC2A6; --accent-ink:#0A1A16; --accent-soft:#163932;
-  --mute:#F0915A; --good:#4CC97E; --bad:#F06B5B; --pulse:#F2B85A; color-scheme:dark;
-}}
-:root[data-theme="dark"]{
-  --bg:#10161A; --surface:#182026; --ink:#E3EAED; --muted:#93A2AC; --line:#33414A;
-  --accent:#3BC2A6; --accent-ink:#0A1A16; --accent-soft:#163932;
-  --mute:#F0915A; --good:#4CC97E; --bad:#F06B5B; --pulse:#F2B85A; color-scheme:dark;
+:root[data-theme="light"]{
+  --bg:#F4F0F8; --surface:#FFFFFF; --raise:#EDE7F4; --ink:#17111F; --muted:#5C5170; --line:#D9D0E4;
+  --accent:#D41F68; --accent-ink:#FFFFFF; --accent-soft:#FBE0EB;
+  --mute:#A35F00; --good:#0B8A72; --bad:#C2352B; --pulse:#E39A1C;
+  --cb-str:var(--ink); --cb-fret:var(--line); --cb-dot:var(--accent); --cb-dot-ink:var(--accent-ink); --cb-x:var(--mute); --cb-lbl:var(--muted);
+  color-scheme:light;
 }
+/* guitar finishes: they recolour the chord diagrams */
+.finish-classic{--cb-bg:transparent;--cb-str:var(--ink);--cb-fret:var(--line);--cb-dot:var(--accent);--cb-dot-ink:var(--accent-ink);--cb-x:var(--pulse);--cb-lbl:var(--muted)}
+.finish-midnight{--cb-bg:#07060A;--cb-str:#E9E6F2;--cb-fret:#2A2733;--cb-dot:#FFB547;--cb-dot-ink:#0F0B16;--cb-x:#FF4D8D;--cb-lbl:#8E88A0}
+.finish-rosewood{--cb-bg:#3B2314;--cb-str:#F3E3C3;--cb-fret:#7A5232;--cb-dot:#FF5A36;--cb-dot-ink:#FFFFFF;--cb-x:#FFB08F;--cb-lbl:#C9A887}
+.finish-sunburst{--cb-bg:radial-gradient(circle at 50% 42%,#F6B23C 0%,#C2561A 58%,#3A1206 100%);--cb-str:#FFF4DE;--cb-fret:#5A220C;--cb-dot:#1A0D06;--cb-dot-ink:#F6B23C;--cb-x:#FFF4DE;--cb-lbl:#FFE2B0}
+.finish-seafoam{--cb-bg:#9FE2CF;--cb-str:#123A30;--cb-fret:#5FAE98;--cb-dot:#E2456F;--cb-dot-ink:#FFFFFF;--cb-x:#B1173F;--cb-lbl:#1F5A4A}
+.finish-gold{--cb-bg:#231C07;--cb-str:#F5D27A;--cb-fret:#5C4A14;--cb-dot:#F5D27A;--cb-dot-ink:#231C07;--cb-x:#FF9B6B;--cb-lbl:#C9AE62}
+.finish-neon{--cb-bg:#07070F;--cb-str:#39FFEE;--cb-fret:#1D2140;--cb-dot:#FF2BD6;--cb-dot-ink:#07070F;--cb-x:#FFE600;--cb-lbl:#7F86C9}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
-.app{max-width:520px;margin:0 auto;padding-inline:16px;padding-block:10px 28px;display:flex;flex-direction:column;gap:14px;min-height:100%;box-sizing:border-box}
+.app{max-width:520px;margin:0 auto;padding-inline:16px;padding-block:12px calc(96px + env(safe-area-inset-bottom, 0px));display:flex;flex-direction:column;gap:14px;min-height:100%;box-sizing:border-box}
 [hidden]{display:none!important}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,label:focus-within{outline:3px solid var(--accent);outline-offset:2px}
@@ -41,20 +49,20 @@ button:focus-visible,label:focus-within{outline:3px solid var(--accent);outline-
 /* stage */
 .stage{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px 12px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;touch-action:pan-y}
 #box{width:100%;max-width:300px;height:auto;display:block}
-.cbox{overflow:visible}
-.cbox .str{stroke:var(--ink);transition:stroke .5s ease}
+.cbox{overflow:visible;background:var(--cb-bg);border-radius:16px}
+.cbox .str{stroke:var(--cb-str);transition:stroke .5s ease}
 .cbox .str.ring{stroke:var(--pulse);transition:none}
-.cbox .fret{stroke:var(--line);stroke-width:2}
-.cbox .nut{fill:var(--ink)}
-.cbox .dot{fill:var(--accent)}
-.cbox .dot-t{fill:var(--accent-ink);font:700 15px var(--f-body);text-anchor:middle;dominant-baseline:central}
+.cbox .fret{stroke:var(--cb-fret);stroke-width:2}
+.cbox .nut{fill:var(--cb-str)}
+.cbox .dot{fill:var(--cb-dot)}
+.cbox .dot-t{fill:var(--cb-dot-ink);font:700 15px var(--f-body);text-anchor:middle;dominant-baseline:central}
 .cbox .mk{font:700 17px var(--f-mono);text-anchor:middle;dominant-baseline:central}
-.cbox .mk.x{fill:var(--mute)} .cbox .mk.o{fill:none;stroke:var(--ink);stroke-width:2.2}
-.cbox .lbl{fill:var(--muted);font:500 13px var(--f-mono);text-anchor:middle}
-.cbox .ft{fill:var(--muted);font:500 12px var(--f-mono);text-anchor:end;dominant-baseline:central}
+.cbox .mk.x{fill:var(--cb-x)} .cbox .mk.o{fill:none;stroke:var(--cb-str);stroke-width:2.2}
+.cbox .lbl{fill:var(--cb-lbl);font:500 13px var(--f-mono);text-anchor:middle}
+.cbox .ft{fill:var(--cb-lbl);font:500 12px var(--f-mono);text-anchor:end;dominant-baseline:central}
 .namerow{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;width:100%;max-width:340px}
 .nav{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:transparent;display:grid;place-items:center;font-size:1.3rem;color:var(--muted)}
-h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.6rem,13vw,3.6rem);line-height:1;letter-spacing:-.03em;margin:0;text-align:center}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(3rem,15vw,4.2rem);line-height:1;letter-spacing:.01em;margin:0;text-align:center}
 .quality{font-size:.85rem;color:var(--muted);text-align:center;margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
 .tab{display:grid;grid-template-columns:repeat(6,2.1em);text-align:center;font-family:var(--f-mono);margin-top:4px}
 .tab span{font-size:.72rem;color:var(--muted)} .tab b{font-size:1.05rem}
@@ -142,7 +150,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 /* v0.7 */
 .cbox .pv{fill:none;stroke:var(--pulse);stroke-width:3.5}
 .cbox .pv.slide{stroke-dasharray:5 4}
-.cbox .capolbl{fill:var(--accent);font:700 12px var(--f-mono)}
+.cbox .capolbl{fill:var(--cb-dot);font:700 12px var(--f-mono)}
 .capo{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);margin-top:6px}
 .capo select,.pairsel select,.field input[type=number]{font:inherit;font-size:.95rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;min-height:40px;padding:0 8px}
 .pnext{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px}
@@ -213,22 +221,131 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
-@media (prefers-reduced-motion: reduce){ .cbox .str,.cb .bar,#tNeedle{transition:none} .counter .big.pop{animation:none} }
+/* v0.8: On Tour */
+.verdict,.feed,.lyric b{font-family:var(--f-body);font-weight:700}
+.card h2,.etitle{font-weight:400;text-transform:uppercase;letter-spacing:.03em}
+.pinfo h2,.counter .big,.tnote,.labout,.stats b,.pair figcaption,.chip{font-weight:400}
+.top .brand{font-family:var(--f-display);font-weight:400;font-size:1.35rem;letter-spacing:.06em}
+.streak{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 8px;color:var(--ink);min-height:36px}
+.streak svg{width:18px;height:18px}
+.streak b{font:700 .95rem var(--f-mono)}
+.streak span{font-size:.75rem;color:var(--muted)}
+.stagebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-top:6px}
+.stagebar .capo{margin:0}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:5;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px max(8px,calc((100vw - 520px) / 2)) calc(8px + env(safe-area-inset-bottom,0px))}
+.tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.72rem;color:var(--muted);min-height:50px;justify-content:center}
+.tabbar svg{width:23px;height:23px}
+.tabbar button[aria-selected="true"]{color:var(--accent);font-weight:700}
+.hype{display:flex;align-items:center;justify-content:space-between;margin-bottom:-4px}
+.combo b{font:400 2.4rem/1 var(--f-display);color:var(--pulse)}
+.combo span{font:400 1rem var(--f-display);letter-spacing:.08em;margin-left:6px}
+.crowd{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.crowd span{font:500 .62rem var(--f-mono);letter-spacing:.14em;color:var(--muted)}
+.cbars{display:flex;align-items:flex-end;gap:3px;height:26px}
+.cbars i{width:6px;border-radius:2px;background:var(--line);transition:background .2s}
+.cbars i:nth-child(1){height:8px}.cbars i:nth-child(2){height:11px}.cbars i:nth-child(3){height:14px}.cbars i:nth-child(4){height:17px}.cbars i:nth-child(5){height:20px}.cbars i:nth-child(6){height:23px}.cbars i:nth-child(7){height:26px}
+.cbars i.on{background:var(--accent)}
+.mono{font:500 .7rem var(--f-mono);letter-spacing:.14em;color:var(--pulse)}
+.vname{font:400 3.3rem/.95 var(--f-display);letter-spacing:.01em}
+.vfans{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);gap:8px}
+.vfans b{color:var(--ink)}
+.vbar{height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.vbar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .6s}
+.route{display:flex;align-items:flex-start;padding:4px 22px 0}
+.route b{flex:1;height:2px;background:var(--line);margin-top:5px}
+.route .stop{display:flex;flex-direction:column;align-items:center;gap:5px;width:0}
+.stop i{position:relative;z-index:1;width:12px;height:12px;border-radius:50%;border:2px solid var(--line);box-sizing:border-box;flex:none;background:var(--surface)}
+.stop span{font-size:.58rem;color:var(--muted);white-space:nowrap}
+.stop.past i{background:var(--good);border-color:var(--good)}
+.stop.here i{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.stop.here span{color:var(--ink);font-weight:700}
+.setlist{display:flex;flex-direction:column;gap:8px}
+.set{display:flex;align-items:center;gap:12px;background:var(--raise);border:1px solid transparent;border-radius:14px;padding:12px 14px;text-align:left;min-height:48px}
+.set i{width:22px;height:22px;border-radius:7px;border:2px solid var(--accent);box-sizing:border-box;display:grid;place-items:center;flex:none}
+.set span{flex:1;font-size:.95rem}
+.set em{font:700 .75rem var(--f-mono);color:var(--accent);font-style:normal}
+.set.done{cursor:default}
+.set.done i{background:var(--good);border-color:var(--good);color:var(--bg)}
+.set.done span{color:var(--muted);text-decoration:line-through}
+.set.done em{color:var(--good)}
+.cardhead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.gcase{position:relative;height:250px}
+.gcase .handle{position:absolute;left:35%;width:30%;top:0;height:30px;border:6px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;box-sizing:border-box}
+.gcase .shell{position:absolute;left:0;right:0;top:24px;bottom:0;background:var(--raise);border:2px solid var(--line);border-radius:56px 56px 36px 36px}
+.gcase .slot{position:absolute;line-height:0}
+.gcase .empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:0 40px;color:var(--muted);font-size:.9rem}
+.stickergrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px}
+.stickergrid figure{margin:0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}
+.stickergrid figcaption{font-size:.78rem;font-weight:700}
+.stickergrid small{display:block;font-weight:400;color:var(--muted);font-size:.68rem;margin-top:2px}
+.finishes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.finish{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:10px;align-items:center;text-align:left;background:var(--raise);border:2px solid transparent;border-radius:14px;padding:8px;color:var(--ink)}
+.finish .sw{grid-row:span 2;width:40px;height:40px;border-radius:10px;background:var(--cb-bg);border:1px solid var(--line);display:grid;place-items:center;box-sizing:border-box}
+.finish .sw i{width:14px;height:14px;border-radius:50%;background:var(--cb-dot)}
+.finish b{font-size:.85rem}
+.finish small{font-size:.68rem;color:var(--muted)}
+.finish[aria-pressed="true"]{border-color:var(--accent)}
+.finish:disabled{opacity:.45;cursor:not-allowed}
+.reward{position:fixed;inset:0;background:color-mix(in srgb,#000 60%,transparent);display:grid;place-items:center;padding:16px;z-index:11}
+.rewardcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px;max-width:420px;width:100%;max-height:calc(100% - 32px);overflow:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;animation:rise .35s ease}
+@keyframes rise{from{transform:translateY(24px) scale(.96);opacity:0}}
+.rewardcard h2{font:400 1.5rem var(--f-display);letter-spacing:.03em;text-transform:uppercase;margin:0}
+.rewardcard p{margin:0}
+.rewardcard .row .btn{flex:1}
+.rtag{font:700 .72rem var(--f-mono);letter-spacing:.2em;color:var(--good);text-align:center}
+.poster{background:#FFB547;color:#0F0B16;border-radius:6px;padding:22px 18px 16px;transform:rotate(-1.5deg);display:flex;flex-direction:column;gap:4px;box-shadow:0 14px 30px #0009;margin:4px 6px}
+.pmono{font:700 .7rem var(--f-mono);letter-spacing:.18em}
+.pname{font:400 4rem/.9 var(--f-display);overflow-wrap:anywhere}
+.plive{font:400 1.1rem var(--f-display);letter-spacing:.1em}
+.pvenue{font:400 2.7rem/.95 var(--f-display);background:#FF4D8D;padding:4px 8px 2px;align-self:flex-start}
+.pline{height:2px;background:#0F0B16;margin:10px 0 4px}
+.pfoot{display:flex;justify-content:space-between;font:700 .6rem var(--f-mono);letter-spacing:.06em;gap:6px}
+.unlocks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.unlocks li{background:var(--raise);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column}
+.unlocks span{font-size:.82rem;color:var(--muted)}
+.bigsticker{display:grid;place-items:center;padding:6px 0}
+@media (prefers-reduced-motion: reduce){ .cbox .str,.cb .bar,#tNeedle,.vbar i{transition:none} .counter .big.pop,.rewardcard{animation:none} }
 </style>
 
 <div class="app">
   <header class="top">
-    <div class="brand"><i></i>Bobby’s Guitar <span class="ver" id="ver"></span></div>
-    <div class="toggles">
-      <button class="pill" id="tLefty" aria-pressed="false">Left-handed</button>
-      <button class="pill" id="tNotes" aria-pressed="false">Note names</button>
-    </div>
+    <div class="brand">BOBBY’S GUITAR <span class="ver" id="ver"></span></div>
+    <button class="streak" id="streakChip" aria-label="Tour days in a row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--pulse)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5 1-8.5z"/></svg>
+      <b id="streakN">0</b><span>tour days</span>
+    </button>
   </header>
-  <nav class="seg" role="tablist" aria-label="Mode">
-    <button id="tabChords" role="tab" aria-selected="true">Chords</button>
-    <button id="tabPlay" role="tab" aria-selected="false">Play along</button>
-    <button id="tabPractice" role="tab" aria-selected="false">Practice</button>
-  </nav>
+
+  <div class="view" id="viewTour" hidden>
+    <section class="card venue">
+      <div class="mono" id="vLevel">NOW PLAYING · LEVEL 1 OF 7</div>
+      <div class="vname" id="vName">THE BEDROOM</div>
+      <div class="vfans"><span><b id="vFans">0</b> fans</span><span id="vNext"></span></div>
+      <div class="vbar"><i id="vBar"></i></div>
+      <div class="route" id="vRoute"></div>
+    </section>
+    <section class="card">
+      <h2>Tonight’s setlist</h2>
+      <div class="setlist" id="setlist"></div>
+      <p class="hint" id="setlistNote"></p>
+    </section>
+    <section class="card">
+      <div class="cardhead"><h2>My guitar case</h2><span class="hint" id="caseCount"></span></div>
+      <div class="gcase" id="gcase"></div>
+      <button class="small" id="bAllStickers">All stickers</button>
+      <div class="stickergrid" id="stickerGrid" hidden></div>
+    </section>
+    <section class="card">
+      <h2>Guitar finish</h2>
+      <div class="finishes" id="finishes"></div>
+      <p class="hint">New finishes unlock as you play bigger venues. They change how your chord diagrams look.</p>
+    </section>
+    <section class="card">
+      <h2>Settings</h2>
+      <label class="field">Your stage name (for the gig posters)<input id="stageName" type="text" maxlength="20" autocomplete="off"></label>
+      <div class="row"><button class="pill" id="tDaylight" aria-pressed="false">Daylight mode</button><button class="small" id="bIntro2">Show the intro again</button></div>
+    </section>
+  </div>
 
   <div class="view" id="viewChords">
   <section class="stage" id="stage" aria-label="Chord diagram">
@@ -240,7 +357,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
     </div>
     <div class="tab" id="tab" aria-label="Frets from low E to high e"></div>
     <p class="tip" id="tip"></p>
-    <label class="capo">Capo <select id="capo"></select></label>
+    <div class="stagebar"><label class="capo">Capo <select id="capo"></select></label><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
   </section>
 
   <div class="actions">
@@ -283,6 +400,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
         <div class="pnext">Then <span id="pNext"><b>C</b></span></div>
       </div>
     </section>
+    <div class="hype"><div class="combo"><b id="pCombo">×0</b><span>COMBO</span></div><div class="crowd"><span>CROWD</span><div class="cbars" id="pCrowd"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
     <div class="lanewrap" id="laneWrap">
       <canvas id="lane" aria-label="Chord lane: chords scroll towards the line, strum when the ball lands"></canvas>
       <div class="lanemsg" id="laneMsg">Strum each time the ball lands. Change chord when a new block reaches the line.</div>
@@ -341,7 +459,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
   </div>
 
   <div class="view" id="viewPractice" hidden>
-    <section class="card">
+    <section class="card" id="cardTuner">
       <h2>Tuner</h2>
       <div class="tuner" id="tuner">
         <svg id="tMeter" viewBox="0 -20 300 130" aria-hidden="true">
@@ -358,7 +476,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
       <button class="btn primary" id="bTuner">Start tuner</button>
     </section>
 
-    <section class="card">
+    <section class="card" id="cardChanges">
       <h2>One-minute changes</h2>
       <div class="row pairsel"><select id="chA" aria-label="First chord"></select><span>⇄</span><select id="chB" aria-label="Second chord"></select></div>
       <div class="pair"><figure><svg id="boxA" class="cbox" viewBox="0 0 260 332"></svg><figcaption id="nameA"></figcaption></figure><figure><svg id="boxB" class="cbox" viewBox="0 0 260 332"></svg><figcaption id="nameB"></figcaption></figure></div>
@@ -368,7 +486,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
       <button class="btn primary" id="bChanges">Start (60 seconds)</button>
     </section>
 
-    <section class="card">
+    <section class="card" id="cardQuiz">
       <h2>Name that chord</h2>
       <label class="field">Chords to include<select id="qSet"><option value="first">First chords</option><option value="sev">First chords and sevenths</option><option value="all">Everything</option></select></label>
       <button class="btn primary" id="bQuizPlay">Play a chord</button>
@@ -390,6 +508,20 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
       <div class="score" id="labTally"></div>
       <button class="btn" id="bLab">Start listening</button>
     </section>
+  </div>
+</div>
+
+<nav class="tabbar" role="tablist" aria-label="Sections">
+  <button id="tabChords" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v18M13 3v18M5 9h14M5 14h14"/></svg>Chords</button>
+  <button id="tabPlay" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>Play</button>
+  <button id="tabPractice" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Practice</button>
+  <button id="tabTour" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10l8-6 8 6v10M9 20v-6h6v6"/></svg>Tour</button>
+</nav>
+
+<div class="reward" id="reward" hidden role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+  <div class="rewardcard">
+    <div id="rewardBody"></div>
+    <div class="row"><button class="btn" id="rewardShare" hidden>Share</button><button class="btn primary" id="rewardOk">Keep rocking</button></div>
   </div>
 </div>
 
@@ -666,7 +798,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.7.1';
+const APP_VERSION = '0.8.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -866,6 +998,7 @@ function showVerdict(chroma){
   if (v.ok){
     el.className = 'verdict good';
     el.textContent = `That's ${cur().name}. Nice.`;
+    noteHeard(cur());
     $('hint').textContent = v.weak.length ? `${NOTE[v.weak[0]]} is a little quiet. Check the ${stringsFor(v.weak[0]).join(' / ')}.` : 'Every note is ringing clearly.';
   } else {
     el.className = 'verdict bad';
@@ -1164,6 +1297,7 @@ function evalBeats(){
       T.recent.push({dt, at:performance.now()}); if (T.recent.length > 8) T.recent.shift();
     }
     T.beatRes.set(hb, st);
+    onStrum(st === 'good' || st === 'ok');
     T.stats.beats++; if (st === 'good' || st === 'ok') T.stats.beatsOn++;
     renderScore();
   }
@@ -1207,6 +1341,7 @@ function clearBlock(i, st, label, lenient){
   // how long the change took, for the progress page
   const t0 = T.starts.get(i);
   if (st === 'good' && i > 0 && t0 != null) recordChange(chordAt(i - 1), chordAt(i), Math.max(0, ctx.currentTime - t0 - P.latency));
+  if (st === 'good'){ noteHeard(chordAt(i)); addFans(5); }
   T.pending = i + 1; T.acc = null; T.okTicks = 0;
   T.stats.cleared++;
   setFeed(label, st !== 'good' ? '' : lenient ? 'late' : 'good');
@@ -1243,7 +1378,7 @@ function finalizeDue(){
     T.results.set(i, {st});
     if (T.hasMic){
       const s = T.stats; s.total++;
-      if (st !== 'bad') s.right++;
+      if (st !== 'bad'){ s.right++; noteHeard(ch); addFans(st === 'good' ? 5 : 3); }
       if (st === 'good'){ s.onTime++; s.streak++; s.best = Math.max(s.best, s.streak); } else s.streak = 0;
       setFeed(label, st);
       renderScore();
@@ -1275,8 +1410,9 @@ async function startPlay(){
   try { await openMic(); T.hasMic = true; } catch (e){ T.hasMic = false; }
   Object.assign(T, {running:true, waiting:false, counting:false, anchorBeat:-4, anchorTime:ctx.currentTime + 0.25, nextClick:-4,
     pending:0, evalIdx:0, acc:null, okTicks:0, shown:-1, results:new Map(), accs:new Map(), starts:new Map(), onsets:[],
-    used:new Set(), slotQ:[], beatRes:new Map(), recent:[], startBpm:P.bpm, reached:P.bpm, ramped:new Set(),
+    used:new Set(), slotQ:[], beatRes:new Map(), recent:[], startBpm:P.bpm, reached:P.bpm, ramped:new Set(), combo:0, crowd:0, lastPass:0, floaters:[],
     stats:{total:0, right:0, onTime:0, streak:0, best:0, cleared:0, beats:0, beatsOn:0}});
+  T.passSnap = {...T.stats}; renderHype();
   T.sched = setInterval(scheduler, 25); scheduler();
   $('bGo').disabled = false; $('bGo').textContent = 'Stop';
   lockSettings(true);
@@ -1296,10 +1432,12 @@ function stopPlay(){
   $('bGo').textContent = 'Start';
   lockSettings(false);
   showMsg(summary());
+  if (P.ramp && T.reached - T.startBpm >= 20) earn('speed');
   T.shown = -1;
   save();
   closeMicIfIdle();
   keepAwake();
+  maybeShowReward();
 }
 function lockSettings(on){
   ['song', 'pattern', 'bNewSong', 'bEditSong', 'bDelSong', 'bShare', 'bCal'].forEach(id => $(id).disabled = on);
@@ -1320,6 +1458,7 @@ function renderPlaySettings(){
   const bits = [];
   if (s.bpm) bits.push(`${s.bpm} bpm`);
   if (s.capo) bits.push(`capo ${s.capo}`);
+  const stars = TOUR().songStars[s.id]; if (stars) bits.push('★'.repeat(stars) + '☆'.repeat(3 - stars));
   bits.push(`${timeline().len} beats`);
   $('songInfo').textContent = [bits.join(' · '), s.note || ''].filter(Boolean).join('. ');
   $('perField').hidden = s.entries.every(e => e.b);   // real songs set their own lengths
@@ -1432,11 +1571,13 @@ function drawLane(){
     g.fillStyle = fill || k.surface; g.fill();
     if (!fill){ g.lineWidth = 1.5; g.strokeStyle = k.line; g.stroke(); }
     g.fillStyle = text;
-    g.font = `800 ${Math.max(14, Math.min(24, (xb - xa) * 0.42))}px "Bricolage Grotesque", system-ui, sans-serif`;
+    g.font = `400 ${Math.max(15, Math.min(26, (xb - xa) * 0.45))}px Anton, "Arial Narrow", sans-serif`;
     g.textBaseline = 'middle';
-    g.fillText(B.ch.name, x0 + 6, top + (bot - top) / 2 + 1);
+    // keep the chord name in view while its block is still under the line
+    const lw = g.measureText(B.ch.name).width;
+    g.fillText(B.ch.name, Math.max(x0 + 6, Math.min(8, xb - lw - 8)), top + (bot - top) / 2 + 1);
     if (B.sec){
-      g.fillStyle = k.muted; g.font = '700 11px "Atkinson Hyperlegible", system-ui, sans-serif';
+      g.fillStyle = k.muted; g.font = '700 11px Archivo, system-ui, sans-serif';
       g.fillText(B.sec.toUpperCase(), x0, 14);
       g.fillRect(x0, 22, 1.5, 8);
     }
@@ -1452,6 +1593,15 @@ function drawLane(){
       if (res === 'miss'){ g.lineWidth = 1.8; g.strokeStyle = col; g.stroke(); } else { g.fillStyle = col; g.fill(); }
     }
   }
+  // "+N fans" floating up from the strum line
+  const nowMs = performance.now();
+  T.floaters = (T.floaters || []).filter(f => nowMs - f.at < 1100);
+  for (const f of T.floaters){
+    const a = (nowMs - f.at) / 1100;
+    g.globalAlpha = 1 - a; g.fillStyle = k.good; g.font = '700 14px Archivo, system-ui, sans-serif';
+    g.fillText(`+${f.n} fan${f.n === 1 ? '' : 's'}`, nowX + 22, 46 - a * 28);
+  }
+  g.globalAlpha = 1;
   // the strum line
   g.strokeStyle = k.ink; g.globalAlpha = 0.22 + T.flash * 0.6; g.lineWidth = 2 + T.flash * 2;
   g.beginPath(); g.moveTo(nowX, 6); g.lineTo(nowX, h - 6); g.stroke();
@@ -1515,6 +1665,7 @@ function frame(){
     }
     if (P.mode === 'keep') finalizeDue();
     evalBeats();
+    checkPass(raw);
     if (raw < 0){ showMsg(String(Math.ceil(-raw)), true); T.counting = true; }
     else if (T.counting){ $('laneMsg').hidden = true; T.counting = false; }
   }
@@ -1524,25 +1675,31 @@ function frame(){
 }
 const VIEWS = ['chords', 'play', 'edit', 'practice'];
 function showView(v){
-  $('viewChords').hidden = v !== 'chords'; $('viewPlay').hidden = v !== 'play';
-  $('viewEdit').hidden = v !== 'edit'; $('viewPractice').hidden = v !== 'practice';
+  const isPlay = v === 'play';
+  $('viewChords').hidden = v !== 'chords'; $('viewPlay').hidden = !isPlay;
+  $('viewEdit').hidden = v !== 'edit'; $('viewPractice').hidden = v !== 'practice'; $('viewTour').hidden = v !== 'tour';
   $('tabChords').setAttribute('aria-selected', v === 'chords');
   $('tabPlay').setAttribute('aria-selected', v === 'play' || v === 'edit');
   $('tabPractice').setAttribute('aria-selected', v === 'practice');
+  $('tabTour').setAttribute('aria-selected', v === 'tour');
   if (v !== 'play') stopPlay();
   if (v !== 'practice') stopPractice();
-  if (v === 'play'){
-    if (listening) stopMic();
+  if (v !== 'chords' && listening) stopMic();
+  if (isPlay){
     T.shown = -1;
     cancelAnimationFrame(rafId); rafId = requestAnimationFrame(frame);
   }
-  if (v === 'practice'){ if (listening) stopMic(); renderPractice(); }
+  if (v === 'practice') renderPractice();
+  if (v === 'tour') renderTour();
   state.view = v === 'edit' ? 'play' : v; save();
+  window.scrollTo(0, 0);
+  maybeShowReward();
 }
 
 $('tabChords').onclick = () => showView('chords');
 $('tabPlay').onclick = () => showView('play');
 $('tabPractice').onclick = () => showView('practice');
+$('tabTour').onclick = () => showView('tour');
 $('bGo').onclick = () => T.running ? stopPlay() : startPlay();
 $('laneWrap').onclick = () => {
   if (T.running && P.mode === 'wait') clearBlock(T.pending, T.hasMic ? 'skip' : 'none', T.hasMic ? `Skipped ${chordAt(T.pending).name}` : '');
@@ -1633,6 +1790,7 @@ $('eSave').onclick = () => {
   const list = mySongs(), k = list.findIndex(x => x.id === rec.id);
   if (k >= 0) list[k] = rec; else list.push(rec);
   draft = null;
+  earn('songwriter');
   showView('play'); selectSong(rec.id);
 };
 $('eCancel').onclick = () => { draft = null; showView('play'); };
@@ -1669,6 +1827,7 @@ async function loadLibrary(){
     LIBRARY = got.map((j, k) => j && libSong(j, files[k])).filter(x => x && x.entries.length);
   } catch (e){ LIBRARY = []; }
   if (!T.running) renderPlaySettings();
+  if (!$('viewTour').hidden) renderTour();
 }
 
 /* ---------- sharing songs ---------- */
@@ -1690,9 +1849,9 @@ function songFromCode(code){
 $('bShare').onclick = async () => {
   const s = song(), url = location.origin + location.pathname + '#song=' + songCode(s);
   try {
-    if (navigator.share){ await navigator.share({title: `Bobby’s Guitar: ${s.name}`, text: `Play along to “${s.name}” in Bobby’s Guitar`, url}); return; }
+    if (navigator.share){ await navigator.share({title: `Bobby’s Guitar: ${s.name}`, text: `Play along to “${s.name}” in Bobby’s Guitar`, url}); earn('shared'); return; }
   } catch (e){ if (e && e.name === 'AbortError') return; }
-  try { await navigator.clipboard.writeText(url); $('shareOut').hidden = true; $('pMic').textContent = 'Link copied. Send it to anyone with Bobby’s Guitar.'; }
+  try { await navigator.clipboard.writeText(url); earn('shared'); $('shareOut').hidden = true; $('pMic').textContent = 'Link copied. Send it to anyone with Bobby’s Guitar.'; }
   catch (e){ $('shareOut').hidden = false; $('shareOut').value = url; $('shareOut').select(); $('pMic').textContent = 'Copy this link to share the song:'; }
 };
 let pendingImport = null;
@@ -1749,9 +1908,11 @@ function recordChange(a, b, secs){
 // practice time: any second with something running counts
 let saveTick = 0;
 setInterval(() => {
-  if (!(T.running || TR.running || listening || TUNER.on || LAB.on)) return;
+  if (!(T.running || TR.running || listening || TUNER.on || LAB.on)){ maybeShowReward(); return; }
   const log = STORE('log'), k = dayKey(); log[k] = (log[k] || 0) + 1;
   if (++saveTick % 15 === 0) save();
+  const tt = TOUR(); tt.secs = (tt.secs || 0) + 1;
+  if (tt.secs % 60 === 0) minuteTick();
 }, 1000);
 function stopPractice(){
   if (TR.running) stopTrainer();
@@ -1760,7 +1921,7 @@ function stopPractice(){
 }
 
 /* tuner */
-const TUNER = {on: false, timer: 0, target: null, smooth: null, quiet: 0};
+const TUNER = {on: false, timer: 0, target: null, smooth: null, quiet: 0, held: 0};
 async function toggleTuner(){
   if (TUNER.on){
     TUNER.on = false; clearInterval(TUNER.timer);
@@ -1800,6 +1961,7 @@ function tunerTick(){
   $('tNote').textContent = STR_LONG[s];
   $('tCents').textContent = Math.abs(c) < 5 ? 'In tune' : `${c > 0 ? '+' : ''}${c} cents · tune ${c > 0 ? 'down' : 'up'}`;
   setNeedle(TUNER.smooth, true);
+  if (Math.abs(TUNER.smooth) < 5){ if (++TUNER.held === 8){ earn('tuned'); completeDaily('tune'); } } else TUNER.held = 0;
   [...$('tStrings').children].forEach((b, i) => b.classList.toggle('hit', i === s));
 }
 $('bTuner').onclick = toggleTuner;
@@ -1854,11 +2016,14 @@ function stopTrainer(finished){
   $('chA').disabled = $('chB').disabled = false;
   if (finished){
     const bests = STORE('bests'), k = pairKey(), prev = bests[k] || 0;
-    if (TR.count > prev) bests[k] = TR.count;
+    if (TR.count > prev){ bests[k] = TR.count; if (prev) addFans(15, false); }
+    if (TR.count >= 20) earn('changes20');
+    if (TR.count >= 30) earn('changes30');
+    if (k === [...setlist().pair].sort().join(' ⇄ ')) completeDaily('changes');
     $('chInfo').textContent = TR.count > prev && prev ? `${TR.count} changes, a new best (was ${prev})!` : `${TR.count} changes. ${prev && TR.count <= prev ? `Your best is ${prev}.` : ''}`;
     save();
   } else renderTrainer();
-  closeMicIfIdle(); keepAwake();
+  closeMicIfIdle(); keepAwake(); maybeShowReward();
 }
 function trainerTick({rms, chroma}){
   if (!TR.running || TR.manual || rms < THRESH) return;
@@ -1866,7 +2031,8 @@ function trainerTick({rms, chroma}){
   if (!TR.acc) TR.acc = new Float32Array(12);
   for (let k = 0; k < 12; k++) TR.acc[k] = TR.acc[k] * 0.6 + n[k] * 0.4;
   if (judgeFor(TR.acc, target, templates, P.forgive).ok && ++TR.ok >= 2){
-    if (TR.started){ TR.count++; $('chCount').textContent = TR.count; $('chCount').classList.remove('pop'); void $('chCount').offsetWidth; $('chCount').classList.add('pop'); }
+    noteHeard(target);
+    if (TR.started){ TR.count++; addFans(1, false); $('chCount').textContent = TR.count; $('chCount').classList.remove('pop'); void $('chCount').offsetWidth; $('chCount').classList.add('pop'); }
     TR.started = true; TR.expect ^= 1; TR.ok = 0; TR.acc = null;
     $('chInfo').textContent = `Now ${trPair()[TR.expect].name}`;
   }
@@ -1898,6 +2064,7 @@ $('qAnswers').onclick = e => {
   const right = chordById(b.dataset.id).name === QZ.cur.name;
   QZ.done = true; QZ.total++;
   if (right){ QZ.score++; QZ.streak++; } else QZ.streak = 0;
+  if (right){ addFans(3, false); const dl = setlist(); dl.quiz = (dl.quiz || 0) + 1; if (dl.quiz >= 5) completeDaily('quiz'); if (QZ.streak >= 10) earn('golden-ears'); }
   const q = STORE('quiz'); q.best = Math.max(q.best || 0, QZ.streak);
   [...$('qAnswers').children].forEach(x => x.classList.add(chordById(x.dataset.id).name === QZ.cur.name ? 'right' : x === b ? 'wrong' : 'dim'));
   $('qResult').textContent = right ? `Yes, ${QZ.cur.name}.` : `That was ${QZ.cur.name}.`;
@@ -1912,18 +2079,13 @@ $('qAnswers').onclick = e => {
 function renderProgress(){
   const log = STORE('log'), days = [];
   for (let i = 6; i >= 0; i--){ const d = new Date(); d.setDate(d.getDate() - i); days.push({k: dayKey(d), label: d.toLocaleDateString(undefined, {weekday: 'narrow'}), s: log[dayKey(d)] || 0}); }
-  let streak = 0;
-  for (let i = 0; i < 400; i++){
-    const d = new Date(); d.setDate(d.getDate() - i);
-    if ((log[dayKey(d)] || 0) >= 60) streak++;
-    else if (i > 0) break;   // today doesn't break the streak until it's over
-  }
+  const streak = tourDays();
   const max = Math.max(600, ...days.map(d => d.s));
   const changes = Object.entries(STORE('changes')).filter(([, r]) => r.n >= 2).map(([k, r]) => ({k, avg: r.sum / r.n, n: r.n})).sort((a, b) => b.avg - a.avg).slice(0, 3);
   const bests = Object.entries(STORE('bests')).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const mins = s => s < 60 ? `${s} s` : `${Math.round(s / 60)} min`;
   $('progress').innerHTML = `
-    <div class="stats"><div><b>${streak}</b><span>day streak</span></div><div><b>${mins(days[6].s)}</b><span>today</span></div><div><b>${mins(days.reduce((a, d) => a + d.s, 0))}</b><span>this week</span></div></div>
+    <div class="stats"><div><b>${streak}</b><span>tour days</span></div><div><b>${mins(days[6].s)}</b><span>today</span></div><div><b>${mins(days.reduce((a, d) => a + d.s, 0))}</b><span>this week</span></div></div>
     <div class="bars" aria-label="Minutes practised, last 7 days">${days.map(d => `<div class="bar" title="${mins(d.s)}"><i style="height:${Math.round(d.s / max * 100)}%"></i><span>${d.label}</span></div>`).join('')}</div>
     <h3>Slowest changes</h3>${changes.length ? `<ul>${changes.map(c => `<li><b>${esc(c.k)}</b> ${c.avg.toFixed(1)} s on average <span>(${c.n} times)</span></li>`).join('')}</ul>` : '<p class="hint">Play along in “Wait for me” mode and your slowest chord changes will show up here.</p>'}
     <h3>One-minute changes</h3>${bests.length ? `<ul>${bests.map(([k, v]) => `<li><b>${esc(k)}</b> ${v} changes</li>`).join('')}</ul>` : '<p class="hint">No scores yet.</p>'}
@@ -1974,6 +2136,7 @@ $('capo').onchange = e => setCapo(+e.target.value);
 /* ---------- first-run intro ---------- */
 const INTRO = [
   ['Welcome to Bobby’s Guitar', 'Learn chords with big diagrams, hear how each one should sound, and strum along to songs. The app listens through your microphone to check your playing.'],
+  ['Go on tour', 'Every clean chord change, on-time strum and minute of practice earns fans. Win enough fans to go from your bedroom all the way to the stadium, and collect stickers for your guitar case on the way.'],
   ['Tune up first', 'Chord checking works best on an in-tune guitar. The tuner is in the Practice tab.'],
   ['Set up your timing', 'Hold the phone near the guitar’s sound hole. In Play along, tap “Calibrate timing” once so the app knows your device’s delay.'],
   ['Your first chord: Em', 'Two fingers, all six strings. Tap Strum to hear it, then Listen to check yours.'],
@@ -1986,13 +2149,302 @@ function renderIntro(){
   $('introTitle').textContent = h; $('introText').textContent = p;
   $('introNext').textContent = introAt === INTRO.length - 1 ? 'Let’s play' : 'Next';
 }
-function endIntro(){ $('intro').hidden = true; state.onboarded = true; save(); }
+function endIntro(){ $('intro').hidden = true; state.onboarded = true; save(); maybeShowReward(); }
 $('introNext').onclick = () => {
   if (introAt < INTRO.length - 1){ introAt++; renderIntro(); return; }
-  endIntro(); showView('chords'); go(CHORDS.findIndex(c => c.id === 'Em'));
+  endIntro(); showView('chords'); go(CHORDS.findIndex(c => c.id === 'Em')); maybeShowReward();
 };
 $('introSkip').onclick = endIntro;
 $('bIntro').onclick = showIntro;
+
+/* ---------- On Tour: fans, venues, stickers, tonight's setlist ---------- */
+const VENUES = [
+  {name: 'Bedroom', fans: 0, finish: 'classic'},
+  {name: 'Garage', fans: 150, finish: 'midnight'},
+  {name: 'Open Mic', fans: 500, finish: 'rosewood'},
+  {name: 'Pub Gig', fans: 1200, finish: 'sunburst'},
+  {name: 'Club', fans: 2500, finish: 'seafoam'},
+  {name: 'Festival', fans: 5000, finish: 'gold'},
+  {name: 'Stadium', fans: 10000, finish: 'neon'},
+];
+const FINISHES = {classic: 'Stage classic', midnight: 'Midnight black', rosewood: 'Rosewood', sunburst: 'Sunburst', seafoam: 'Sea-foam green', gold: 'Gold top', neon: 'Neon'};
+const STICKERS = [
+  ['first-chord', '1ST', 'First chord', 'The app heard you play your first chord.'],
+  ['tuned', 'TUNED', 'Tuned up', 'Got a string spot on with the tuner.'],
+  ['first-eight', '8/8', 'The first eight', 'Played all eight first chords.'],
+  ['first-song', 'ENCORE', 'First song', 'Played a whole song through.'],
+  ['streak3', '3 DAYS', '3-day tour', 'Practised three days running.'],
+  ['streak7', '7 DAYS', '7-day tour', 'A whole week on tour.'],
+  ['streak30', '30 DAYS', '30-day tour', 'A month without stopping.'],
+  ['combo10', '×10', 'Combo ×10', 'Ten strums on time in a row.'],
+  ['combo25', '×25', 'Combo ×25', 'Twenty-five strums on time in a row.'],
+  ['combo50', '×50', 'Combo ×50', 'Fifty strums on time in a row.'],
+  ['changes20', '20', '20 changes', 'Twenty chord changes in one minute.'],
+  ['changes30', '30', '30 changes', 'Thirty chord changes in one minute.'],
+  ['barre', 'BARRE', 'Barre boss', 'Played the full F chord cleanly three times.'],
+  ['golden-ears', 'EARS', 'Golden ears', 'Named ten chords in a row by ear.'],
+  ['three-stars', '★★★', 'Three stars', 'Got three stars on a song.'],
+  ['speed', '+20', 'Speed demon', 'Sped a song up by 20 bpm.'],
+  ['songwriter', 'WRITER', 'Songwriter', 'Made a song of your own.'],
+  ['shared', 'SHARED', 'Spread the word', 'Shared a song with someone.'],
+  ['sevenths', '7TH', 'Seventh heaven', 'Played five different seventh chords.'],
+  ['power', 'POWER', 'Power trio', 'Played E5, A5 and D5.'],
+  ['hour', '1 HR', 'One-hour club', 'Practised for an hour in total.'],
+  ['ten-hours', '10 HRS', 'Ten-hour club', 'Practised for ten hours in total.'],
+  ['night-owl', 'LATE', 'Night owl', 'Practised after 10 pm.'],
+  ['early-bird', 'EARLY', 'Early bird', 'Practised before 8 am.'],
+].map(([id, big, name, desc], i) => ({id, big, name, desc, shape: ['circle', 'star', 'tag', 'pass', 'burst'][i % 5], color: ['#FFB547', '#FF4D8D', '#3EE6C4', '#A99BFF', '#F5F0FA'][(i * 2) % 5]}));
+const TOUR = () => {
+  const t = state.tour = state.tour || {};
+  t.fans = t.fans || 0; t.stickers = t.stickers || {}; t.heard = t.heard || {}; t.songStars = t.songStars || {};
+  t.finish = t.finish || 'classic'; t.name = t.name || 'Bobby';
+  return t;
+};
+const venueIndex = fans => VENUES.reduce((v, x, i) => fans >= x.fans ? i : v, 0);
+const fmt = n => n.toLocaleString();
+
+// fans
+let floatAcc = null;
+function addFans(n, show = true){
+  if (!(n > 0)) return;
+  const t = TOUR(), before = venueIndex(t.fans);
+  t.fans += n;
+  if (show && T.running){
+    // nearby awards merge into one "+N fans" in the lane
+    if (floatAcc && performance.now() - floatAcc.at < 400){ floatAcc.n += n; floatAcc.at = performance.now(); }
+    else { floatAcc = {n, at: performance.now()}; T.floaters.push(floatAcc); }
+  }
+  const after = venueIndex(t.fans);
+  for (let v = before + 1; v <= after; v++) queueReward({kind: 'level', v});
+  renderStreak();
+}
+function earn(id){
+  const t = TOUR();
+  if (t.stickers[id] || !STICKERS.some(s => s.id === id)) return;
+  t.stickers[id] = dayKey();
+  addFans(15, false);
+  queueReward({kind: 'sticker', id});
+  save();
+}
+
+// chords the app has recognised (throttled so one long strum counts once)
+const lastHeardAt = {};
+function noteHeard(ch){
+  if (!ch) return;
+  const now = performance.now();
+  if (now - (lastHeardAt[ch.id] || 0) < 2500) return;
+  lastHeardAt[ch.id] = now;
+  const t = TOUR(); t.heard[ch.id] = (t.heard[ch.id] || 0) + 1;
+  earn('first-chord');
+  if (CHORDS.filter(c => c.group === 'first').every(c => t.heard[c.id])) earn('first-eight');
+  if ((t.heard.F || 0) >= 3) earn('barre');
+  if (CHORDS.filter(c => c.group === 'sev' && t.heard[c.id]).length >= 5) earn('sevenths');
+  if (['E5', 'A5', 'D5'].every(id => t.heard[id])) earn('power');
+}
+
+// combo and crowd in Play along
+function onStrum(hit){
+  T.crowd = (T.crowd || 0) * 0.85 + (hit ? 0.15 : 0);
+  if (hit){
+    T.combo = (T.combo || 0) + 1;
+    addFans(T.combo % 10 === 0 ? 6 : 1);
+    if (T.combo >= 10) earn('combo10');
+    if (T.combo >= 25) earn('combo25');
+    if (T.combo >= 50) earn('combo50');
+    const dl = setlist(); dl.strums = (dl.strums || 0) + 1;
+    if (dl.strums >= 50) completeDaily('strums');
+  } else T.combo = 0;
+  renderHype();
+}
+function renderHype(){
+  $('pCombo').textContent = `×${T.combo || 0}`;
+  const lit = Math.round((T.crowd || 0) * 7);
+  [...$('pCrowd').children].forEach((b, i) => b.classList.toggle('on', i < lit));
+}
+// a full time through the song
+function checkPass(raw){
+  const len = timeline().len;
+  if (raw < len + 0.5) return;
+  const pass = Math.floor((raw - 0.5) / len);
+  if (pass <= T.lastPass) return;
+  T.lastPass = pass;
+  songFinished();
+}
+function songFinished(){
+  const s = T.stats, a = T.passSnap || {}, d = k => (s[k] || 0) - (a[k] || 0), t = TOUR(), id = song().id;
+  T.passSnap = {...s};
+  addFans(20); earn('first-song');
+  if (id === setlist().song) completeDaily('song');
+  if (P.mode === 'keep' && T.hasMic && d('total') > 0){
+    const score = (d('right') / d('total') + (d('beats') ? d('beatsOn') / d('beats') : 1)) / 2;
+    const stars = score >= 0.95 ? 3 : score >= 0.8 ? 2 : score >= 0.6 ? 1 : 0, prev = t.songStars[id] || 0;
+    if (stars > prev){ t.songStars[id] = stars; addFans(10 * (stars - prev)); }
+    if (stars === 3) earn('three-stars');
+    setFeed(`Song complete: ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}`, stars >= 2 ? 'good' : 'late');
+  } else setFeed('Song complete! +20 fans', 'good');
+}
+
+// tour days: days with at least a minute of practice, allowing one rest day a week
+function tourDays(){
+  const log = STORE('log'), has = i => { const d = new Date(); d.setDate(d.getDate() - i); return (log[dayKey(d)] || 0) >= 60; };
+  let n = 0, lastRest = -99;
+  for (let i = 0; i < 1000; i++){
+    if (has(i)){ n++; continue; }
+    if (i === 0) continue;                          // today isn't over yet
+    if (i - lastRest >= 7 && has(i + 1)){ lastRest = i; continue; }
+    break;
+  }
+  return n;
+}
+function checkStreak(){ const n = tourDays(); if (n >= 3) earn('streak3'); if (n >= 7) earn('streak7'); if (n >= 30) earn('streak30'); }
+function renderStreak(){ $('streakN').textContent = tourDays(); if (!$('viewTour').hidden) renderTour(); }
+function minuteTick(){
+  addFans(2, false);
+  const log = STORE('log'), total = Object.values(log).reduce((a, b) => a + b, 0), h = new Date().getHours();
+  if (total >= 3600) earn('hour');
+  if (total >= 36000) earn('ten-hours');
+  if (h >= 22) earn('night-owl');
+  if (h >= 4 && h < 8) earn('early-bird');
+  if ((log[dayKey()] || 0) >= 600) completeDaily('minutes');
+  checkStreak(); renderStreak();
+}
+
+// tonight's setlist: three small goals a day, the same all day
+const PAIRS = [['G', 'C'], ['C', 'D'], ['Em', 'Am'], ['D', 'A'], ['G', 'D'], ['Am', 'E'], ['C', 'Am'], ['G', 'Em']];
+function setlist(){
+  const t = TOUR(), k = dayKey();
+  if (!t.daily || t.daily.date !== k){
+    let seed = [...k].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+    const rnd = () => (seed = (Math.imul(seed, 1103515245) + 12345) >>> 0) / 4294967296;
+    const extra = ['changes', 'song', 'quiz', 'minutes', 'strums'].map(x => [rnd(), x]).sort((a, b) => a[0] - b[0]).slice(0, 2).map(x => x[1]);
+    t.daily = {date: k, items: ['tune', ...extra], pair: PAIRS[Math.floor(rnd() * PAIRS.length)], song: null, pick: rnd(), done: [], quiz: 0, strums: 0};
+  }
+  const dl = t.daily;
+  if (!dl.song && LIBRARY.length){
+    const tier = Math.max(1, Math.ceil((venueIndex(t.fans) + 1) / 2)), pool = LIBRARY.filter(s => (s.level || 1) <= tier);
+    dl.song = (pool.length ? pool : LIBRARY)[Math.floor(dl.pick * (pool.length || LIBRARY.length))].id;
+  }
+  return dl;
+}
+function setlistItem(id, dl){
+  const songName = (allSongs().find(x => x.id === dl.song) || WARMUPS[2]).name;
+  return {
+    tune: ['Tune your guitar', 10],
+    changes: [`One-minute changes: ${dl.pair[0]} ⇄ ${dl.pair[1]}`, 25],
+    song: [`Play “${songName}” all the way through`, 40],
+    quiz: ['Name 5 chords by ear', 20],
+    minutes: ['Practise for 10 minutes', 20],
+    strums: ['Land 50 strums on time', 25],
+  }[id];
+}
+function completeDaily(id){
+  const dl = setlist();
+  if (!dl.items.includes(id) || dl.done.includes(id)) return;
+  dl.done.push(id);
+  addFans(setlistItem(id, dl)[1]);
+  if (dl.done.length === dl.items.length) addFans(25);
+  save(); renderStreak();
+}
+function goDaily(id){
+  const dl = setlist();
+  if (id === 'tune' || id === 'quiz' || id === 'changes'){
+    showView('practice');
+    if (id === 'changes'){ $('chA').value = dl.pair[0]; $('chB').value = dl.pair[1]; renderTrainer(); }
+    $(id === 'tune' ? 'cardTuner' : id === 'quiz' ? 'cardQuiz' : 'cardChanges').scrollIntoView({block: 'start'});
+  } else if (id === 'song'){ showView('play'); if (dl.song) selectSong(dl.song); }
+  else if (id === 'strums') showView('play');
+  else showView('chords');
+}
+
+// rewards: level-up posters and new stickers, shown when nothing is being played
+const REWARDS = [];
+function queueReward(r){ REWARDS.push(r); maybeShowReward(); }
+const busy = () => T.running || TR.running || listening || TUNER.on || !$('intro').hidden;
+function maybeShowReward(){
+  if (!$('reward').hidden || busy() || !REWARDS.length) return;
+  const r = REWARDS.shift(), t = TOUR();
+  $('rewardShare').hidden = r.kind !== 'level';
+  if (r.kind === 'level'){
+    const V = VENUES[r.v], tier = r.v <= 2 ? 1 : r.v <= 4 ? 2 : 3, songs = LIBRARY.filter(s => (s.level || 1) === tier).slice(0, 3).map(s => s.name);
+    $('rewardBody').innerHTML = `<div class="rtag">LEVEL UP · ${fmt(V.fans)} FANS</div>
+      <div class="poster"><div class="pmono">TONIGHT ONLY</div><div class="pname">${esc(t.name.toUpperCase())}</div><div class="plive">LIVE AT THE</div>
+      <div class="pvenue">${esc(V.name.toUpperCase())}</div><div class="pline"></div><div class="pfoot"><span>LEVEL ${r.v + 1} OF 7</span><span>DOORS 7PM</span><span>FREE ENTRY</span></div></div>
+      <h2 id="rewardTitle">You’ve unlocked</h2>
+      <ul class="unlocks"><li><b>Guitar finish: ${FINISHES[V.finish]}</b><span>Pick it in the Tour tab</span></li>${songs.length ? `<li><b>Songs for this stage</b><span>${songs.map(esc).join(' · ')}</span></li>` : ''}</ul>`;
+    $('rewardOk').textContent = `Play the ${V.name}`;
+    $('rewardShare').onclick = () => shareText(`${t.name} just reached the ${V.name} in Bobby’s Guitar!`);
+  } else {
+    const s = STICKERS.find(x => x.id === r.id), n = Object.keys(t.stickers).length;
+    $('rewardBody').innerHTML = `<div class="rtag">NEW STICKER</div><div class="bigsticker">${stickerSVG(s, 210, -8)}</div>
+      <h2 id="rewardTitle">${esc(s.name)}</h2><p>${esc(s.desc)}</p><p class="hint">${n} of ${STICKERS.length} stickers · +15 fans</p>`;
+    $('rewardOk').textContent = 'Stick it on my case';
+  }
+  $('reward').hidden = false; $('rewardOk').focus();
+}
+$('rewardOk').onclick = () => { $('reward').hidden = true; if (!$('viewTour').hidden) renderTour(); maybeShowReward(); };
+async function shareText(text){
+  const url = location.origin + location.pathname;
+  try { if (navigator.share){ await navigator.share({title: 'Bobby’s Guitar', text, url}); return; } } catch (e){ if (e && e.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(`${text} ${url}`); $('rewardShare').textContent = 'Copied'; } catch (e) {}
+}
+
+// sticker artwork: a die-cut shape with a short word on it
+function stickerSVG(s, size, rot = 0, locked = false){
+  const shapes = {
+    circle: '<circle cx="50" cy="50" r="44"/>',
+    tag: '<rect x="5" y="22" width="90" height="56" rx="14"/>',
+    pass: '<rect x="17" y="5" width="66" height="90" rx="12"/>',
+    star: '<path d="M50 4l12.6 27.6 30.2 3.3-22.5 20.4 6.3 29.7L50 69.8 23.4 85l6.3-29.7L7.2 34.9l30.2-3.3z"/>',
+    burst: '<path d="M50 3l9 14 16-6 1 17 16 5-9 14 9 14-16 5-1 17-16-6-9 14-9-14-16 6-1-17-16-5 9-14-9-14 16-5 1-17 16 6z"/>',
+  };
+  const fs = s.big.length <= 3 ? 30 : s.big.length <= 5 ? 21 : 16;
+  const body = locked
+    ? `<g fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="6 5">${shapes[s.shape]}</g><text x="50" y="52" fill="var(--muted)" font-family="Anton, sans-serif" font-size="26" text-anchor="middle" dominant-baseline="central">?</text>`
+    : `<g fill="${s.color}" stroke="#F5F0FA" stroke-width="5" stroke-linejoin="round">${shapes[s.shape]}</g>${s.shape === 'pass' ? '<rect x="40" y="13" width="20" height="6" rx="3" fill="#0F0B16"/>' : ''}<text x="50" y="${s.shape === 'pass' ? 55 : 51}" fill="#0F0B16" font-family="Anton, sans-serif" font-size="${fs}" text-anchor="middle" dominant-baseline="central">${esc(s.big)}</text>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="transform:rotate(${rot}deg)" role="img" aria-label="${esc(locked ? 'Locked sticker' : 'Sticker: ' + s.name)}">${body}</svg>`;
+}
+
+// the Tour tab
+const CASE_SLOTS = [[4, 18, -12], [36, 10, 6], [68, 16, 10], [16, 50, 5], [48, 46, -6], [74, 52, -10], [2, 62, 8], [56, 70, 4]];
+function renderTour(){
+  const t = TOUR(), v = venueIndex(t.fans), V = VENUES[v], N = VENUES[v + 1];
+  $('vLevel').textContent = `NOW PLAYING · LEVEL ${v + 1} OF ${VENUES.length}`;
+  $('vName').textContent = `THE ${V.name.toUpperCase()}`;
+  $('vFans').textContent = fmt(t.fans);
+  $('vNext').textContent = N ? `${fmt(N.fans - t.fans)} more to the ${N.name}` : 'You’ve played the stadium!';
+  $('vBar').style.width = N ? `${Math.round((t.fans - V.fans) / (N.fans - V.fans) * 100)}%` : '100%';
+  $('vRoute').innerHTML = VENUES.map((x, i) => `<div class="stop ${i < v ? 'past' : i === v ? 'here' : ''}"><i></i><span>${x.name}</span></div>`).join('<b></b>');
+  const dl = setlist();
+  $('setlist').innerHTML = dl.items.map(id => {
+    const [text, f] = setlistItem(id, dl), done = dl.done.includes(id);
+    return `<button class="set${done ? ' done' : ''}" data-id="${id}"><i aria-hidden="true">${done ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>' : ''}</i><span>${esc(text)}</span><em>+${f}</em></button>`;
+  }).join('');
+  $('setlistNote').textContent = dl.done.length === dl.items.length ? 'Set complete! +25 bonus fans. A new setlist arrives tomorrow.' : 'Finish all three for 25 bonus fans.';
+  const got = STICKERS.filter(s => t.stickers[s.id]).sort((a, b) => (t.stickers[b.id] > t.stickers[a.id] ? 1 : -1));
+  $('caseCount').textContent = `${got.length} of ${STICKERS.length}`;
+  $('gcase').innerHTML = '<div class="handle"></div><div class="shell">' +
+    (got.length ? got.slice(0, CASE_SLOTS.length).map((s, i) => `<span class="slot" style="left:${CASE_SLOTS[i][0]}%;top:${CASE_SLOTS[i][1]}%">${stickerSVG(s, 78, CASE_SLOTS[i][2])}</span>`).join('')
+      : '<span class="empty">Your stickers go here. Play to earn your first.</span>') + '</div>';
+  $('stickerGrid').innerHTML = STICKERS.map(s => `<figure>${stickerSVG(s, 64, 0, !t.stickers[s.id])}<figcaption>${esc(s.name)}<small>${esc(t.stickers[s.id] ? s.desc : s.desc)}</small></figcaption></figure>`).join('');
+  $('finishes').innerHTML = VENUES.map((x, i) => `<button class="finish finish-${x.finish}" data-f="${x.finish}" aria-pressed="${t.finish === x.finish}" ${i > v ? 'disabled' : ''}><span class="sw"><i></i></span><b>${FINISHES[x.finish]}</b><small>${i > v ? `Unlocks at the ${x.name}` : i === 0 ? 'Starter' : `From the ${x.name}`}</small></button>`).join('');
+  $('stageName').value = t.name;
+  $('tDaylight').setAttribute('aria-pressed', document.documentElement.dataset.theme === 'light');
+}
+function applyFinish(){
+  const f = TOUR().finish;
+  document.body.className = document.body.className.replace(/\bfinish-\S+/g, '').trim() + ` finish-${f}`;
+}
+$('setlist').onclick = e => { const b = e.target.closest('.set'); if (b && !b.classList.contains('done')) goDaily(b.dataset.id); };
+$('finishes').onclick = e => { const b = e.target.closest('.finish'); if (b && !b.disabled){ TOUR().finish = b.dataset.f; applyFinish(); renderTour(); save(); } };
+$('bAllStickers').onclick = () => { const g = $('stickerGrid'); g.hidden = !g.hidden; $('bAllStickers').textContent = g.hidden ? 'All stickers' : 'Hide'; };
+$('stageName').onchange = e => { TOUR().name = e.target.value.trim().slice(0, 20) || 'Bobby'; save(); };
+$('tDaylight').onclick = () => {
+  const light = document.documentElement.dataset.theme !== 'light';
+  if (light) document.documentElement.dataset.theme = 'light'; else delete document.documentElement.dataset.theme;
+  state.daylight = light; TOK = null; save(); renderTour();
+};
+$('streakChip').onclick = () => showView('tour');
+$('bIntro2').onclick = () => showIntro();
 
 /* ---------- wiring ---------- */
 $('bStrum').onclick = () => play('strum');
@@ -2007,7 +2459,7 @@ $('tNotes').onclick = () => { state.notes = !state.notes; render(); };
 $('groups').onclick = e => { const b = e.target.closest('.grp'); if (b){ state.group = b.dataset.g; render(); } };
 $('chips').onclick = e => { const b = e.target.closest('.chip'); if (b) go(+b.dataset.i); };
 document.addEventListener('keydown', e => {
-  if (e.target.closest('input, select') || !$('viewEdit').hidden || !$('viewPractice').hidden || !$('intro').hidden) return;
+  if (e.target.closest('input, select') || !$('viewEdit').hidden || !$('viewPractice').hidden || !$('viewTour').hidden || !$('intro').hidden || !$('reward').hidden) return;
   if (!$('viewPlay').hidden){
     if (e.key === ' ' && !e.target.closest('button')){ e.preventDefault(); T.running ? stopPlay() : startPlay(); }
     return;
@@ -2030,8 +2482,11 @@ buildChroma();
 render();
 $('capo').value = CAPO;
 renderPlaySettings();
-showView(['play', 'practice'].includes(state.view) ? state.view : 'chords');
+if (state.daylight) document.documentElement.dataset.theme = 'light';
+applyFinish();
+showView(['play', 'practice', 'chords', 'tour'].includes(state.view) ? state.view : 'tour');
 loadLibrary();
 checkImport();
 if (!state.onboarded) showIntro();
+checkStreak(); renderStreak();
 </script>

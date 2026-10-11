@@ -6,6 +6,7 @@ A beginner guitar chord trainer that runs in the browser and installs as an app 
 - **Play along:** chords scroll past with a bouncing ball. In *Wait for me* mode it waits until it hears the right chord; in *Keep going* mode it scores the chord and the timing of every strum.
 - **Strum patterns** from one strum per chord up to down-up eighths, a **song library** (the `songs/` folder: traditional songs with lyrics, and well-known songs as chords and sections only), and **your own songs** with per-chord lengths, sections and lyrics, shareable as a link.
 - **Practice:** tuner, one-minute chord changes with pivot-finger hints, a Name-that-chord ear quiz, practice tracking, and an experimental strum-direction lab.
+- **On Tour:** earn fans for clean changes, on-time strums and practice to climb from the Bedroom to the Stadium, with daily setlists, combos, 24 stickers for your guitar case, gig-poster level-ups and unlockable guitar finishes.
 - Works offline once installed. Everything stays on your device.
 
 **Use it:** https://gerschwin.github.io/bobbys-guitar/ — on a phone, use *Install* (Android) or *Share → Add to Home Screen* (iPhone).
