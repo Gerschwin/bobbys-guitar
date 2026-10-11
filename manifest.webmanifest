@@ -1,6 +1,6 @@
 {
-  "name": "First Frets",
-  "short_name": "First Frets",
+  "name": "Bobby’s Guitar",
+  "short_name": "Bobby’s Guitar",
   "description": "Learn guitar chords and strum along.",
   "start_url": "./",
   "scope": "./",

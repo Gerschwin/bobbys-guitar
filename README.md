@@ -1,4 +1,4 @@
-# First Frets
+# Bobby’s Guitar
 
 A beginner guitar chord trainer that runs in the browser and installs as an app on your phone.
 
@@ -8,7 +8,7 @@ A beginner guitar chord trainer that runs in the browser and installs as an app 
 - **Practice:** tuner, one-minute chord changes with pivot-finger hints, a Name-that-chord ear quiz, practice tracking, and an experimental strum-direction lab.
 - Works offline once installed. Everything stays on your device.
 
-**Use it:** https://gerschwin.github.io/first-frets/ — on a phone, use *Install* (Android) or *Share → Add to Home Screen* (iPhone).
+**Use it:** https://gerschwin.github.io/bobbys-guitar/ — on a phone, use *Install* (Android) or *Share → Add to Home Screen* (iPhone).
 
 ## Developing
 
