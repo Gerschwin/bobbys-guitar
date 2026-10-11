@@ -231,7 +231,10 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .stagebar .pill{font-size:.75rem;padding:5px 9px;white-space:nowrap}
 .stagebar select.capo{font:inherit;font-size:.8rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;min-height:32px;padding:0 8px}
 .gobar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
+.gobar{display:grid;grid-template-columns:54px minmax(0,1fr);gap:8px}
 .gobar .btn.big{min-height:54px}
+.gobar .cog{padding:0}
+.gobar .cog svg{width:24px;height:24px}
 #viewPlay{padding-bottom:76px}
 /* v0.8.3: the header slides away while scrolling down and comes back on the way up */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);margin:-12px -16px 0;padding:12px 16px 10px;transition:transform .25s ease}
@@ -436,7 +439,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     <div class="feed" id="pFeed" aria-live="polite">&nbsp;</div>
     <div class="score" id="pScore"></div>
     <div class="importbar" id="importBar" hidden><span>Add <b id="importName"></b> to your songs?</span><div class="row"><button class="small" id="importAdd">Add it</button><button class="small" id="importNo">No thanks</button></div></div>
-    <div class="gobar"><button class="btn primary big" id="bGo">Start</button></div>
+    <div class="gobar"><button class="btn big cog" id="bCog" aria-label="Song and settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button><button class="btn primary big" id="bGo">Start</button></div>
     <div class="seg" id="modeSeg" role="radiogroup" aria-label="How the lane moves">
       <button data-v="wait" role="radio">Wait for me</button><button data-v="keep" role="radio">Keep going</button>
     </div>
@@ -824,7 +827,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.8';
+const APP_VERSION = '0.8.9';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1765,6 +1768,12 @@ $('tHear').onclick = () => {
 $('tRamp').onclick = () => { P.ramp = !P.ramp; if (P.ramp && P.rampMax <= P.bpm) P.rampMax = Math.min(200, P.bpm + 40); renderPlaySettings(); };
 $('tVibrate').onclick = () => { P.vibrate = !P.vibrate; renderPlaySettings(); if (P.vibrate) navigator.vibrate(30); };
 $('bCal').onclick = calibrate;
+// the cog jumps down to the song and settings, or back up to the lane if they're already on screen
+$('bCog').onclick = () => {
+  const r = $('modeSeg').getBoundingClientRect(), there = r.top < innerHeight * 0.6 && r.bottom > 0;
+  if (there) window.scrollTo({top: 0, behavior: 'smooth'});
+  else window.scrollTo({top: scrollY + r.top - 12, behavior: 'smooth'});
+};
 
 /* ---------- your own songs ---------- */
 let draft = null, delArmed = false, delTimer = 0, selK = -1, newBeats = 4;
