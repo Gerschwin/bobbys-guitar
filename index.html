@@ -1022,7 +1022,7 @@ function showVerdict(chroma){
     setLive(`✓ That’s ${cur().name}!`, 'good');
     if (!wasOk && performance.now() - lastCheer > 1200){ lastCheer = performance.now(); celebrate($('chordName'), 70); }
     wasOk = true;
-    noteHeard(cur());
+    if (!selfTesting) noteHeard(cur());   // the app's own test strum doesn't earn anything
     $('hint').textContent = v.weak.length ? `${NOTE[v.weak[0]]} is a little quiet. Check the ${stringsFor(v.weak[0]).join(' / ')}.` : 'Every note is ringing clearly.';
   } else {
     el.className = 'verdict bad';
@@ -1035,7 +1035,7 @@ function showVerdict(chroma){
       : 'All the right notes are there, but extra notes are getting in. Check for open strings that should be muted.';
   }
 }
-let wasOk = false, lastCheer = 0;
+let wasOk = false, lastCheer = 0, selfTesting = false;
 function setLive(text, cls){ const l = $('liveStatus'); l.hidden = false; l.textContent = text; l.className = 'live ' + (cls || ''); }
 function resetListen(){
   acc = null; wasOk = false;
@@ -1142,6 +1142,7 @@ async function checkFile(file){
 function selfTest(){
   $('check').hidden = false;
   wasOk = false; lastCheer = 0;   // always celebrate a correct test strum
+  selfTesting = true;
   audio();
   const sr = ctx.sampleRate, ch = cur(), x = new Float32Array(sr * 2);
   let k = 0;
@@ -1151,6 +1152,7 @@ function selfTest(){
     for (let i = 0; i < d.length && i + off < x.length; i++) x[i + off] += 0.2 * d[i];
   });
   showVerdict(analyseSamples(x, sr).acc);
+  selfTesting = false;
   $('hint').textContent += ' (This ran the detector on the app’s own synthesised strum.)';
   play('strum');
 }
@@ -2393,6 +2395,8 @@ function queueReward(r){ REWARDS.push(r); maybeShowReward(); }
 const busy = () => T.running || TR.running || listening || TUNER.on || !$('intro').hidden;
 function maybeShowReward(){
   if (!$('reward').hidden || busy() || !REWARDS.length) return;
+  const wait = 1900 - (performance.now() - (FX.at || -1e9));
+  if (wait > 0){ clearTimeout(FX.rt); FX.rt = setTimeout(maybeShowReward, wait); return; }   // let the confetti land first
   const r = REWARDS.shift(), t = TOUR();
   $('rewardShare').hidden = r.kind !== 'level';
   if (r.kind === 'level'){
@@ -2481,6 +2485,7 @@ $('bIntro2').onclick = () => showIntro();
 // Turns an element green with a little pop and throws confetti out of it.
 const FX = {cv: null, parts: [], raf: 0};
 function celebrate(el, n = 60){
+  FX.at = performance.now();
   el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
   clearTimeout(el._hitT); el._hitT = setTimeout(() => el.classList.remove('hit'), 1600);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
