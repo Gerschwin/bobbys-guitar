@@ -221,6 +221,13 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.8.1: celebrate a correct chord */
+h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
+@keyframes hitpop{30%{transform:scale(1.2)}}
+.live{font-weight:700;font-size:1rem;min-height:1.4em;text-align:center;color:var(--muted)}
+.live.good{color:var(--good)} .live.bad{color:var(--bad)}
+.confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
+@media (prefers-reduced-motion: reduce){ h1.hit,.pinfo h2.hit{animation:none} }
 /* v0.8: On Tour */
 .verdict,.feed,.lyric b{font-family:var(--f-body);font-weight:700}
 .card h2,.etitle{font-weight:400;text-transform:uppercase;letter-spacing:.03em}
@@ -355,6 +362,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
       <div><h1 id="chordName">G</h1><div class="quality" id="quality">major</div></div>
       <button class="nav" id="next" aria-label="Next chord">›</button>
     </div>
+    <div class="live" id="liveStatus" aria-live="polite" hidden></div>
     <div class="tab" id="tab" aria-label="Frets from low E to high e"></div>
     <p class="tip" id="tip"></p>
     <div class="stagebar"><label class="capo">Capo <select id="capo"></select></label><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
@@ -798,7 +806,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.0';
+const APP_VERSION = '0.8.1';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -998,19 +1006,27 @@ function showVerdict(chroma){
   if (v.ok){
     el.className = 'verdict good';
     el.textContent = `That's ${cur().name}. Nice.`;
+    setLive(`✓ That’s ${cur().name}!`, 'good');
+    if (!wasOk && performance.now() - lastCheer > 1200){ lastCheer = performance.now(); celebrate($('chordName'), 70); }
+    wasOk = true;
     noteHeard(cur());
     $('hint').textContent = v.weak.length ? `${NOTE[v.weak[0]]} is a little quiet. Check the ${stringsFor(v.weak[0]).join(' / ')}.` : 'Every note is ringing clearly.';
   } else {
     el.className = 'verdict bad';
     el.textContent = `Sounds more like ${v.best.name}.`;
+    setLive(`Sounds like ${v.best.name}`, 'bad');
+    wasOk = false;
     const stray = strayString(chroma, cur());
     $('hint').textContent = stray != null ? skipMsg(stray, cur()) : v.weak.length
       ? `Can't hear ${v.weak.map(p => NOTE[p]).join(', ')}. Check the ${v.weak.flatMap(stringsFor).join(', ')} – a finger may be muting it.`
       : 'All the right notes are there, but extra notes are getting in. Check for open strings that should be muted.';
   }
 }
+let wasOk = false, lastCheer = 0;
+function setLive(text, cls){ const l = $('liveStatus'); l.hidden = false; l.textContent = text; l.className = 'live ' + (cls || ''); }
 function resetListen(){
-  acc = null;
+  acc = null; wasOk = false;
+  if (listening) setLive(`Listening… strum ${cur().name}`); else $('liveStatus').hidden = true;
   if (!$('check').hidden){
     $('verdict').className = 'verdict';
     $('verdict').textContent = listening ? 'Listening… strum the chord and let it ring.' : 'Strum the chord and let it ring.';
@@ -1065,12 +1081,13 @@ async function startMic(){
 }
 function stopMic(){
   listening = false;
+  $('liveStatus').hidden = true;
   $('bListen').setAttribute('aria-pressed', 'false');
   closeMicIfIdle();
 }
 function listenTick({rms, chroma}){
   if (rms > THRESH){
-    if (!acc || rms > prevRms * 2.2) acc = new Float32Array(12); // new strum: start fresh
+    if (!acc || rms > prevRms * 2.2){ acc = new Float32Array(12); wasOk = false; } // new strum: start fresh, and cheer again if it's right
     const n = normalise(chroma);
     for (let i = 0; i < 12; i++) acc[i] = acc[i] * 0.6 + n[i] * 0.4;
     showVerdict(acc);
@@ -1341,7 +1358,7 @@ function clearBlock(i, st, label, lenient){
   // how long the change took, for the progress page
   const t0 = T.starts.get(i);
   if (st === 'good' && i > 0 && t0 != null) recordChange(chordAt(i - 1), chordAt(i), Math.max(0, ctx.currentTime - t0 - P.latency));
-  if (st === 'good'){ noteHeard(chordAt(i)); addFans(5); }
+  if (st === 'good'){ noteHeard(chordAt(i)); addFans(5); celebrate($('pName'), 40); }
   T.pending = i + 1; T.acc = null; T.okTicks = 0;
   T.stats.cleared++;
   setFeed(label, st !== 'good' ? '' : lenient ? 'late' : 'good');
@@ -2445,6 +2462,37 @@ $('tDaylight').onclick = () => {
 };
 $('streakChip').onclick = () => showView('tour');
 $('bIntro2').onclick = () => showIntro();
+
+/* ---------- confetti ---------- */
+// Turns an element green with a little pop and throws confetti out of it.
+const FX = {cv: null, parts: [], raf: 0};
+function celebrate(el, n = 60){
+  el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+  clearTimeout(el._hitT); el._hitT = setTimeout(() => el.classList.remove('hit'), 1600);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!FX.cv){ FX.cv = document.createElement('canvas'); FX.cv.className = 'confetti'; FX.cv.setAttribute('aria-hidden', 'true'); document.body.append(FX.cv); }
+  const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+  const cols = ['#FF4D8D', '#FFB547', '#3EE6C4', '#A99BFF', '#F5F0FA'];
+  for (let i = 0; i < n; i++){
+    const a = Math.random() * Math.PI * 2, v = 3 + Math.random() * 7;
+    FX.parts.push({x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 4, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4,
+      w: 5 + Math.random() * 5, h: 3 + Math.random() * 4, c: cols[i % cols.length], life: 0});
+  }
+  if (!FX.raf) FX.raf = requestAnimationFrame(fxStep);
+}
+function fxStep(){
+  const cv = FX.cv, dpr = window.devicePixelRatio || 1, W = innerWidth, H = innerHeight;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)){ cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const g = cv.getContext('2d');
+  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+  FX.parts = FX.parts.filter(p => p.life < 90 && p.y < H + 20);
+  for (const p of FX.parts){
+    p.life++; p.vy += 0.25; p.vx *= 0.985; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+    g.save(); g.globalAlpha = Math.min(1, (90 - p.life) / 30); g.translate(p.x, p.y); g.rotate(p.rot);
+    g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); g.restore();
+  }
+  FX.raf = FX.parts.length ? requestAnimationFrame(fxStep) : 0;
+}
 
 /* ---------- wiring ---------- */
 $('bStrum').onclick = () => play('strum');
