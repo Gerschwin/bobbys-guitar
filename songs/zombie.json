@@ -1,0 +1,54 @@
+{
+ "title": "Zombie",
+ "artist": "The Cranberries",
+ "bpm": 84,
+ "level": 1,
+ "pattern": "beat",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own.",
+ "sections": [
+  {
+   "name": "Verse",
+   "repeat": 2,
+   "chords": [
+    [
+     "Em",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "D",
+     4
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "repeat": 2,
+   "chords": [
+    [
+     "Em",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "D",
+     4
+    ]
+   ]
+  }
+ ]
+}

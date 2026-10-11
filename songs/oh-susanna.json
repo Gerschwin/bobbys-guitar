@@ -1,0 +1,74 @@
+{
+ "title": "Oh! Susanna",
+ "artist": "Stephen Foster (1848)",
+ "bpm": 100,
+ "level": 1,
+ "pattern": "beat",
+ "sections": [
+  {
+   "name": "Verse",
+   "chords": [
+    [
+     "G",
+     8,
+     "I come from Alabama with a"
+    ],
+    [
+     "D7",
+     8,
+     "banjo on my knee,"
+    ],
+    [
+     "G",
+     8,
+     "I'm going to Louisiana, my"
+    ],
+    [
+     "D7",
+     4,
+     "true love for to"
+    ],
+    [
+     "G",
+     4,
+     "see."
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "C",
+     8,
+     "Oh, Susanna,"
+    ],
+    [
+     "G",
+     4,
+     "Oh, don't you"
+    ],
+    [
+     "D7",
+     4,
+     "cry for me,"
+    ],
+    [
+     "G",
+     8,
+     "For I come from Alabama with a"
+    ],
+    [
+     "D7",
+     4,
+     "banjo on my"
+    ],
+    [
+     "G",
+     4,
+     "knee."
+    ]
+   ]
+  }
+ ]
+}

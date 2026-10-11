@@ -1,0 +1,32 @@
+{
+ "title": "Wild Thing",
+ "artist": "The Troggs",
+ "bpm": 106,
+ "level": 2,
+ "pattern": "beat",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own.",
+ "sections": [
+  {
+   "name": "Chorus",
+   "repeat": 4,
+   "chords": [
+    [
+     "A",
+     2
+    ],
+    [
+     "D",
+     2
+    ],
+    [
+     "E",
+     2
+    ],
+    [
+     "D",
+     2
+    ]
+   ]
+  }
+ ]
+}

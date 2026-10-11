@@ -1,0 +1,28 @@
+{
+ "title": "Sweet Home Alabama",
+ "artist": "Lynyrd Skynyrd",
+ "bpm": 98,
+ "level": 2,
+ "pattern": "eighths",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own.",
+ "sections": [
+  {
+   "name": "Riff (whole song)",
+   "repeat": 8,
+   "chords": [
+    [
+     "D",
+     2
+    ],
+    [
+     "Cadd9",
+     2
+    ],
+    [
+     "G",
+     4
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,57 @@
+{
+ "title": "Bad Moon Rising",
+ "artist": "Creedence Clearwater Revival",
+ "bpm": 180,
+ "level": 3,
+ "pattern": "beat",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own. The record is fast: start around 110 bpm.",
+ "sections": [
+  {
+   "name": "Verse",
+   "repeat": 4,
+   "chords": [
+    [
+     "D",
+     4
+    ],
+    [
+     "A",
+     2
+    ],
+    [
+     "G",
+     2
+    ],
+    [
+     "D",
+     8
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "G",
+     8
+    ],
+    [
+     "D",
+     8
+    ],
+    [
+     "A",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "D",
+     8
+    ]
+   ]
+  }
+ ]
+}

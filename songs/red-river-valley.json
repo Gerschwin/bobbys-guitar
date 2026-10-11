@@ -1,0 +1,89 @@
+{
+ "title": "Red River Valley",
+ "artist": "Traditional",
+ "bpm": 90,
+ "level": 2,
+ "pattern": "beat",
+ "sections": [
+  {
+   "name": "Verse",
+   "chords": [
+    [
+     "G",
+     8,
+     "From this valley they say you are going,"
+    ],
+    [
+     "G",
+     4,
+     "We will miss your bright eyes and sweet"
+    ],
+    [
+     "D",
+     4,
+     "smile,"
+    ],
+    [
+     "G",
+     4,
+     "For they say you are taking the"
+    ],
+    [
+     "C",
+     4,
+     "sunshine"
+    ],
+    [
+     "D7",
+     4,
+     "That has brightened our pathway a"
+    ],
+    [
+     "G",
+     4,
+     "while."
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "G",
+     8,
+     "Come and sit by my side if you love me,"
+    ],
+    [
+     "G",
+     4,
+     "Do not hasten to bid me"
+    ],
+    [
+     "D",
+     4,
+     "adieu,"
+    ],
+    [
+     "G",
+     4,
+     "But remember the Red River"
+    ],
+    [
+     "C",
+     4,
+     "Valley,"
+    ],
+    [
+     "D7",
+     4,
+     "And the cowboy who loved you so"
+    ],
+    [
+     "G",
+     4,
+     "true."
+    ]
+   ]
+  }
+ ]
+}

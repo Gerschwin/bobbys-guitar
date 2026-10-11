@@ -1,0 +1,69 @@
+{
+ "title": "Take Me Home, Country Roads",
+ "artist": "John Denver",
+ "bpm": 82,
+ "level": 2,
+ "pattern": "folk",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own.",
+ "sections": [
+  {
+   "name": "Verse",
+   "repeat": 2,
+   "chords": [
+    [
+     "G",
+     4
+    ],
+    [
+     "Em",
+     4
+    ],
+    [
+     "D",
+     4
+    ],
+    [
+     "C",
+     4
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "G",
+     4
+    ],
+    [
+     "D",
+     4
+    ],
+    [
+     "Em",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "D",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ]
+   ]
+  }
+ ]
+}

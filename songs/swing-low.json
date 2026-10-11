@@ -1,0 +1,189 @@
+{
+ "title": "Swing Low, Sweet Chariot",
+ "artist": "Traditional spiritual",
+ "bpm": 72,
+ "level": 1,
+ "pattern": "beat",
+ "sections": [
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "G",
+     4,
+     "Swing low,"
+    ],
+    [
+     "C",
+     2,
+     "sweet"
+    ],
+    [
+     "G",
+     6,
+     "chariot,"
+    ],
+    [
+     "G",
+     4,
+     "Coming for to carry me"
+    ],
+    [
+     "D",
+     8,
+     "home;"
+    ],
+    [
+     "G",
+     4,
+     "Swing low,"
+    ],
+    [
+     "C",
+     2,
+     "sweet"
+    ],
+    [
+     "G",
+     6,
+     "chariot,"
+    ],
+    [
+     "G",
+     4,
+     "Coming for to"
+    ],
+    [
+     "D",
+     4,
+     "carry me"
+    ],
+    [
+     "G",
+     8,
+     "home."
+    ]
+   ]
+  },
+  {
+   "name": "Verse",
+   "chords": [
+    [
+     "G",
+     4,
+     "I looked over"
+    ],
+    [
+     "C",
+     2,
+     "Jordan, and"
+    ],
+    [
+     "G",
+     6,
+     "what did I see,"
+    ],
+    [
+     "G",
+     4,
+     "Coming for to carry me"
+    ],
+    [
+     "D",
+     8,
+     "home?"
+    ],
+    [
+     "G",
+     4,
+     "A band of"
+    ],
+    [
+     "C",
+     2,
+     "angels"
+    ],
+    [
+     "G",
+     6,
+     "coming after me,"
+    ],
+    [
+     "G",
+     4,
+     "Coming for to"
+    ],
+    [
+     "D",
+     4,
+     "carry me"
+    ],
+    [
+     "G",
+     8,
+     "home."
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "G",
+     4,
+     "Swing low,"
+    ],
+    [
+     "C",
+     2,
+     "sweet"
+    ],
+    [
+     "G",
+     6,
+     "chariot,"
+    ],
+    [
+     "G",
+     4,
+     "Coming for to carry me"
+    ],
+    [
+     "D",
+     8,
+     "home;"
+    ],
+    [
+     "G",
+     4,
+     "Swing low,"
+    ],
+    [
+     "C",
+     2,
+     "sweet"
+    ],
+    [
+     "G",
+     6,
+     "chariot,"
+    ],
+    [
+     "G",
+     4,
+     "Coming for to"
+    ],
+    [
+     "D",
+     4,
+     "carry me"
+    ],
+    [
+     "G",
+     8,
+     "home."
+    ]
+   ]
+  }
+ ]
+}

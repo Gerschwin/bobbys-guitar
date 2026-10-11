@@ -1,0 +1,76 @@
+{
+ "title": "Leaving on a Jet Plane",
+ "artist": "John Denver",
+ "bpm": 80,
+ "level": 1,
+ "pattern": "folk",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own.",
+ "sections": [
+  {
+   "name": "Verse",
+   "chords": [
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "D",
+     8
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "D",
+     8
+    ]
+   ]
+  }
+ ]
+}

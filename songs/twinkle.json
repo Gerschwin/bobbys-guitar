@@ -1,0 +1,134 @@
+{
+ "title": "Twinkle, Twinkle, Little Star",
+ "artist": "Traditional",
+ "bpm": 90,
+ "level": 1,
+ "pattern": "beat",
+ "sections": [
+  {
+   "name": "Verse",
+   "chords": [
+    [
+     "G",
+     4,
+     "Twinkle, twinkle,"
+    ],
+    [
+     "C",
+     2,
+     "little"
+    ],
+    [
+     "G",
+     2,
+     "star,"
+    ],
+    [
+     "C",
+     2,
+     "How I"
+    ],
+    [
+     "G",
+     2,
+     "wonder"
+    ],
+    [
+     "D",
+     2,
+     "what you"
+    ],
+    [
+     "G",
+     2,
+     "are."
+    ]
+   ]
+  },
+  {
+   "name": "Middle",
+   "chords": [
+    [
+     "G",
+     2,
+     "Up above"
+    ],
+    [
+     "C",
+     2,
+     "the world"
+    ],
+    [
+     "G",
+     2,
+     "so"
+    ],
+    [
+     "D",
+     2,
+     "high,"
+    ],
+    [
+     "G",
+     2,
+     "Like a"
+    ],
+    [
+     "C",
+     2,
+     "diamond"
+    ],
+    [
+     "G",
+     2,
+     "in the"
+    ],
+    [
+     "D",
+     2,
+     "sky."
+    ]
+   ]
+  },
+  {
+   "name": "Verse",
+   "chords": [
+    [
+     "G",
+     4,
+     "Twinkle, twinkle,"
+    ],
+    [
+     "C",
+     2,
+     "little"
+    ],
+    [
+     "G",
+     2,
+     "star,"
+    ],
+    [
+     "C",
+     2,
+     "How I"
+    ],
+    [
+     "G",
+     2,
+     "wonder"
+    ],
+    [
+     "D",
+     2,
+     "what you"
+    ],
+    [
+     "G",
+     2,
+     "are."
+    ]
+   ]
+  }
+ ]
+}

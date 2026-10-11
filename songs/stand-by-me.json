@@ -1,0 +1,63 @@
+{
+ "title": "Stand By Me",
+ "artist": "Ben E. King",
+ "bpm": 118,
+ "capo": 2,
+ "level": 2,
+ "pattern": "beat",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own. Capo 2 matches the record.",
+ "sections": [
+  {
+   "name": "Verse",
+   "repeat": 2,
+   "chords": [
+    [
+     "G",
+     8
+    ],
+    [
+     "Em",
+     8
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "D",
+     4
+    ],
+    [
+     "G",
+     8
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "repeat": 2,
+   "chords": [
+    [
+     "G",
+     8
+    ],
+    [
+     "Em",
+     8
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "D",
+     4
+    ],
+    [
+     "G",
+     8
+    ]
+   ]
+  }
+ ]
+}

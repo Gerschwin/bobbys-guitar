@@ -1,0 +1,85 @@
+{
+ "title": "Let It Be",
+ "artist": "The Beatles",
+ "bpm": 72,
+ "level": 2,
+ "pattern": "beat",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own. F mini is the easy F.",
+ "sections": [
+  {
+   "name": "Verse",
+   "repeat": 2,
+   "chords": [
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "Am",
+     4
+    ],
+    [
+     "Fmini",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "Fmini",
+     2
+    ],
+    [
+     "C",
+     2
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "Am",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "Fmini",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "Fmini",
+     2
+    ],
+    [
+     "C",
+     2
+    ]
+   ]
+  }
+ ]
+}

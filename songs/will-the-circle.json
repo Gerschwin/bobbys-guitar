@@ -1,0 +1,79 @@
+{
+ "title": "Will the Circle Be Unbroken",
+ "artist": "Habershon & Gabriel (1907)",
+ "bpm": 92,
+ "level": 1,
+ "pattern": "folk",
+ "sections": [
+  {
+   "name": "Verse",
+   "chords": [
+    [
+     "G",
+     8,
+     "There are loved ones in the glory,"
+    ],
+    [
+     "C",
+     4,
+     "Whose dear forms"
+    ],
+    [
+     "G",
+     4,
+     "you often miss;"
+    ],
+    [
+     "G",
+     8,
+     "When you close your earthly story,"
+    ],
+    [
+     "D",
+     4,
+     "Will you join them"
+    ],
+    [
+     "G",
+     4,
+     "in their bliss?"
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "chords": [
+    [
+     "G",
+     8,
+     "Will the circle be unbroken,"
+    ],
+    [
+     "C",
+     4,
+     "By and by,"
+    ],
+    [
+     "G",
+     4,
+     "by and by?"
+    ],
+    [
+     "G",
+     8,
+     "Is a better home awaiting"
+    ],
+    [
+     "D",
+     4,
+     "In the sky,"
+    ],
+    [
+     "G",
+     4,
+     "in the sky?"
+    ]
+   ]
+  }
+ ]
+}

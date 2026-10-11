@@ -1,0 +1,60 @@
+{
+ "title": "When the Saints Go Marching In",
+ "artist": "Traditional",
+ "bpm": 100,
+ "level": 1,
+ "pattern": "beat",
+ "sections": [
+  {
+   "name": "Verse",
+   "repeat": 2,
+   "chords": [
+    [
+     "G",
+     8,
+     "Oh, when the saints go marching in,"
+    ],
+    [
+     "G",
+     4,
+     "Oh, when the saints go"
+    ],
+    [
+     "D7",
+     4,
+     "marching in,"
+    ],
+    [
+     "G",
+     4,
+     "Oh Lord, I want to"
+    ],
+    [
+     "G7",
+     4,
+     "be in that"
+    ],
+    [
+     "C",
+     8,
+     "number,"
+    ],
+    [
+     "G",
+     4,
+     "When the saints go"
+    ],
+    [
+     "D7",
+     4,
+     "marching"
+    ],
+    [
+     "G",
+     8,
+     "in."
+    ]
+   ]
+  }
+ ]
+}

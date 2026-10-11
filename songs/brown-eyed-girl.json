@@ -1,0 +1,83 @@
+{
+ "title": "Brown Eyed Girl",
+ "artist": "Van Morrison",
+ "bpm": 150,
+ "level": 3,
+ "pattern": "beat",
+ "note": "Chords only: the lyrics are copyright, so they aren't included. Use “Copy to edit” to add your own.",
+ "sections": [
+  {
+   "name": "Verse",
+   "repeat": 2,
+   "chords": [
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "D",
+     4
+    ]
+   ]
+  },
+  {
+   "name": "Pre-chorus",
+   "chords": [
+    [
+     "C",
+     4
+    ],
+    [
+     "D",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "Em",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "D",
+     4
+    ]
+   ]
+  },
+  {
+   "name": "Chorus",
+   "repeat": 2,
+   "chords": [
+    [
+     "G",
+     4
+    ],
+    [
+     "C",
+     4
+    ],
+    [
+     "G",
+     4
+    ],
+    [
+     "D",
+     4
+    ]
+   ]
+  }
+ ]
+}
