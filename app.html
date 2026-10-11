@@ -221,7 +221,9 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
-/* v0.8.4: Start/Stop stays on screen, just above the tab bar */
+/* v0.8.5 / v0.8.4: the main buttons stay on screen, just above the tab bar */
+.actions.dock{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
+#viewChords{padding-bottom:80px}
 .gobar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
 .gobar .btn.big{min-height:54px}
 #viewPlay{padding-bottom:76px}
@@ -377,7 +379,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     <div class="stagebar"><label class="capo">Capo <select id="capo"></select></label><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
   </section>
 
-  <div class="actions">
+  <div class="actions dock">
     <button class="btn primary" id="bStrum"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l12-7.5z"/></svg>Strum</button>
     <button class="btn" id="bPick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 18h2M9 14h2M13 10h2M17 6h2"/></svg>Pick</button>
     <button class="btn" id="bListen" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>Listen</button>
@@ -815,7 +817,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.4';
+const APP_VERSION = '0.8.5';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
