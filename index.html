@@ -819,7 +819,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.1';
+const APP_VERSION = '0.8.2';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1141,6 +1141,7 @@ async function checkFile(file){
 }
 function selfTest(){
   $('check').hidden = false;
+  wasOk = false; lastCheer = 0;   // always celebrate a correct test strum
   audio();
   const sr = ctx.sampleRate, ch = cur(), x = new Float32Array(sr * 2);
   let k = 0;
