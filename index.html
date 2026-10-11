@@ -60,7 +60,7 @@ button:focus-visible,label:focus-within{outline:3px solid var(--accent);outline-
 
 /* stage */
 .stage{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:14px 12px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;touch-action:pan-y}
-#box{width:100%;max-width:300px;height:auto;display:block}
+#box{width:100%;max-width:320px;height:auto;display:block}
 .cbox{overflow:visible;background:var(--cb-bg);border-radius:16px}
 .cbox .str{stroke:var(--cb-str);transition:stroke .5s ease}
 .cbox .str.ring{stroke:var(--pulse);transition:none}
@@ -237,7 +237,8 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .actions.dock{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
 #viewChords{padding-bottom:80px}
 /* the chord box shrinks on shorter screens so the whole card (name, frets, tip, capo) fits above the buttons */
-#box{width:min(100%,300px,max(160px,calc((100vh - 410px) * 0.766)));width:min(100%,300px,max(160px,calc((100dvh - 410px) * 0.766)))}
+#box{width:min(100%,320px,max(160px,calc((100vh - 370px) * 0.766)));width:min(100%,320px,max(160px,calc((100svh - 370px) * 0.766)))}
+.shelf .tip{align-self:center;margin:0 0 2px}
 .stagebar{flex-wrap:nowrap;gap:6px;margin:0 0 4px}
 .stagebar .pill{font-size:.75rem;padding:5px 9px;white-space:nowrap}
 .stagebar select.capo{font:inherit;font-size:.8rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;min-height:32px;padding:0 8px}
@@ -393,7 +394,6 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     </div>
     <div class="live" id="liveStatus" aria-live="polite" hidden></div>
     <div class="tab" id="tab" aria-label="Frets from low E to high e"></div>
-    <p class="tip" id="tip"></p>
   </section>
 
   <div class="actions dock">
@@ -414,6 +414,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
   </section>
 
   <section class="shelf" aria-label="Choose a chord">
+    <p class="tip" id="tip"></p>
     <div class="stagebar"><select id="capo" class="capo" aria-label="Capo"></select><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
 
     <div class="groups" id="groups" role="tablist"></div>
@@ -836,7 +837,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.7';
+const APP_VERSION = '0.8.8';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
