@@ -233,6 +233,11 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.8.3: the header slides away while scrolling down and comes back on the way up */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);margin:-12px -16px 0;padding:12px 16px 10px;transition:transform .25s ease}
+.top::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:env(safe-area-inset-top,0px);background:var(--bg)}
+.top.away{transform:translateY(calc(-100% - env(safe-area-inset-top,0px)))}
+@media (prefers-reduced-motion: reduce){ .top{transition:none} }
 /* v0.8.1: celebrate a correct chord */
 h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
 @keyframes hitpop{30%{transform:scale(1.2)}}
@@ -819,7 +824,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.2';
+const APP_VERSION = '0.8.3';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -2480,6 +2485,22 @@ $('tDaylight').onclick = () => {
 };
 $('streakChip').onclick = () => showView('tour');
 $('bIntro2').onclick = () => showIntro();
+
+/* ---------- header hides while scrolling down, comes back on the way up ---------- */
+let lastY = 0, hdrTick = false;
+addEventListener('scroll', () => {
+  if (hdrTick) return;
+  hdrTick = true;
+  requestAnimationFrame(() => {
+    const y = scrollY, top = document.querySelector('.top');
+    if (y < 60) top.classList.remove('away');
+    else if (y > lastY + 6) top.classList.add('away');
+    else if (y < lastY - 6) top.classList.remove('away');
+    if (Math.abs(y - lastY) > 6 || y < 60) lastY = y;
+    hdrTick = false;
+  });
+}, {passive: true});
+$('streakChip').addEventListener('focus', () => document.querySelector('.top').classList.remove('away'));
 
 /* ---------- confetti ---------- */
 // Turns an element green with a little pop and throws confetti out of it.
