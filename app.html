@@ -224,6 +224,11 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 /* v0.8.5 / v0.8.4: the main buttons stay on screen, just above the tab bar */
 .actions.dock{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
 #viewChords{padding-bottom:80px}
+/* the chord box shrinks on shorter screens so the whole card (name, frets, tip, capo) fits above the buttons */
+#box{width:min(100%,300px,max(140px,calc((100vh - 460px) * 0.78)));width:min(100%,300px,max(140px,calc((100dvh - 460px) * 0.78)))}
+.stagebar{flex-wrap:nowrap;gap:6px}
+.stagebar .pill{font-size:.75rem;padding:5px 9px;white-space:nowrap}
+.stagebar select.capo{font:inherit;font-size:.8rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;min-height:32px;padding:0 8px}
 .gobar{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
 .gobar .btn.big{min-height:54px}
 #viewPlay{padding-bottom:76px}
@@ -376,7 +381,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     <div class="live" id="liveStatus" aria-live="polite" hidden></div>
     <div class="tab" id="tab" aria-label="Frets from low E to high e"></div>
     <p class="tip" id="tip"></p>
-    <div class="stagebar"><label class="capo">Capo <select id="capo"></select></label><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
+    <div class="stagebar"><select id="capo" class="capo" aria-label="Capo"></select><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
   </section>
 
   <div class="actions dock">
@@ -817,7 +822,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.5';
+const APP_VERSION = '0.8.6';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
