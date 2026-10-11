@@ -139,7 +139,8 @@ h1{font-family:var(--f-display);font-weight:800;font-size:clamp(2.6rem,13vw,3.6r
 .lanemsg.count{font-size:4rem;font-weight:800;background:transparent;color:var(--accent)}
 .meterrow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:-6px}
 #meter{width:100%;height:26px;display:block}
-.feed{font-family:var(--f-display);font-weight:600;font-size:1.12rem;min-height:1.4em;text-align:center;text-wrap:balance}
+/* fixed two-line slot so a longer message never pushes the controls down */
+.feed{font-family:var(--f-display);font-weight:600;font-size:1.02rem;line-height:1.3;height:2.6em;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-align:center;text-wrap:balance}
 .feed.good{color:var(--good)} .feed.late{color:var(--mute)} .feed.bad{color:var(--bad)}
 .score{display:flex;justify-content:center;gap:16px;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;flex-wrap:wrap;min-height:1.2em}
 .score b{color:var(--ink)}
@@ -452,7 +453,7 @@ function judgeFor(chroma, target, templates, forgiving){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.6.0';
+const APP_VERSION = '0.6.1';
 const templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
