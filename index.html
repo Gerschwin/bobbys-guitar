@@ -233,6 +233,12 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.8.11: the header always stays on one line */
+.top{flex-wrap:nowrap}
+.top .brand{font-size:clamp(1.05rem,5.4vw,1.35rem);white-space:nowrap;min-width:0}
+.top .ver{font-size:.65rem}
+.streak{flex:none}
+@media (max-width:400px){ .streak span{display:none} .streak{padding:6px 10px 6px 8px} }
 /* v0.8.5 / v0.8.4: the main buttons stay on screen, just above the tab bar */
 .actions.dock{position:fixed;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:4;padding:10px max(16px,calc((100vw - 520px) / 2 + 16px)) 8px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
 #viewChords{padding-bottom:80px}
@@ -843,7 +849,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.10';
+const APP_VERSION = '0.8.11';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
