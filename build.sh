@@ -18,7 +18,7 @@ VERSION=$(grep -oP "APP_VERSION = '\K[^']+" app.html)
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bobby’s Guitar">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 HEAD
   sed -n '1,/^<\/style>/p' app.html
   printf '<style>body{margin:0}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}</style></head><body>\n'

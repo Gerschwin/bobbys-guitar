@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bobby’s Guitar">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Bobby’s Guitar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -392,7 +392,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     <section class="card">
       <h2>Settings</h2>
       <label class="field">Your stage name (for the gig posters)<input id="stageName" type="text" maxlength="20" autocomplete="off"></label>
-      <div class="row"><button class="pill" id="tDaylight" aria-pressed="false">Daylight mode</button><button class="small" id="bIntro2">Show the intro again</button></div>
+      <div class="row"><button class="pill" id="tKeepOn" aria-pressed="true">Keep screen on</button><button class="pill" id="tDaylight" aria-pressed="false">Daylight mode</button><button class="small" id="bIntro2">Show the intro again</button></div>
     </section>
   </div>
 
@@ -849,7 +849,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.11';
+const APP_VERSION = '0.8.12';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1958,7 +1958,8 @@ try { if ('serviceWorker' in navigator && /^https:$|^http:$/.test(location.proto
 /* ---------- keep the screen awake while playing ---------- */
 let wakeLock = null;
 async function keepAwake(){
-  const want = T.running || TR.running || TUNER.on || LAB.on;
+  // keep the screen on whenever the app is open (a setting, on by default), and always while something is playing
+  const want = state.keepOn !== false || T.running || TR.running || TUNER.on || LAB.on || listening;
   try {
     if (want && !wakeLock && 'wakeLock' in navigator && document.visibilityState === 'visible'){
       wakeLock = await navigator.wakeLock.request('screen');
@@ -1967,6 +1968,8 @@ async function keepAwake(){
   } catch (e){ wakeLock = null; }
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); else save(); });
+// some phones only grant the wake lock after a tap, so try again on the first one
+addEventListener('pointerdown', () => { if (!wakeLock) keepAwake(); }, {passive: true});
 
 /* ---------- practice tab ---------- */
 const STORE = k => (state[k] = state[k] || {});
@@ -2502,6 +2505,7 @@ function renderTour(){
   $('finishes').innerHTML = VENUES.map((x, i) => `<button class="finish finish-${x.finish}" data-f="${x.finish}" aria-pressed="${t.finish === x.finish}" ${i > v ? 'disabled' : ''}><span class="sw"><i></i></span><b>${FINISHES[x.finish]}</b><small>${i > v ? `Unlocks at the ${x.name}` : i === 0 ? 'Starter' : `From the ${x.name}`}</small></button>`).join('');
   $('stageName').value = t.name;
   $('tDaylight').setAttribute('aria-pressed', document.documentElement.dataset.theme === 'light');
+  $('tKeepOn').setAttribute('aria-pressed', state.keepOn !== false);
 }
 function applyFinish(){
   const f = TOUR().finish;
@@ -2516,6 +2520,7 @@ $('tDaylight').onclick = () => {
   if (light) document.documentElement.dataset.theme = 'light'; else delete document.documentElement.dataset.theme;
   state.daylight = light; TOK = null; save(); renderTour();
 };
+$('tKeepOn').onclick = () => { state.keepOn = state.keepOn === false; save(); keepAwake(); renderTour(); };
 $('streakChip').onclick = () => showView('tour');
 $('bIntro2').onclick = () => showIntro();
 
@@ -2610,5 +2615,6 @@ loadLibrary();
 checkImport();
 if (!state.onboarded) showIntro();
 checkStreak(); renderStreak();
+keepAwake();
 </script>
 </body></html>
