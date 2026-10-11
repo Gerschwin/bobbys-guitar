@@ -221,6 +221,24 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.8.13: Play along fits one screen: combo in the chord card, message inside the lane, sizes follow the screen height */
+@media (min-height:700px){ .pstage{grid-template-columns:minmax(0,52%) 1fr} }
+@media (max-height:680px){ .pinfo .eyebrow{display:none} .pinfo .hype{margin-top:6px} .pnext{margin-top:4px} .pstage{padding-block:8px} }
+.pinfo .hype{margin:10px 0 0;flex-wrap:wrap;gap:6px 12px;justify-content:flex-start}
+.pinfo .combo b{font-size:1.9rem}
+.pinfo .combo span{font-size:.8rem}
+.pinfo .crowd{align-items:flex-start}
+.pinfo .cbars{height:20px}
+.pinfo h2{font-size:clamp(2rem,7svh,3.4rem)}
+.pnext{margin-top:8px}
+#pbox{width:min(100%,max(120px,calc((100vh - 404px) * 0.766)));width:min(100%,max(120px,calc((100svh - 404px) * 0.766)));justify-self:center}
+.haswords #pbox{width:min(100%,max(110px,calc((100vh - 492px) * 0.766)));width:min(100%,max(110px,calc((100svh - 492px) * 0.766)))}
+#lane{height:clamp(112px,20svh,150px)}
+.lanewrap .feed{position:absolute;top:6px;right:8px;max-width:64%;height:auto;min-height:0;text-align:right;font-size:.82rem;line-height:1.25;pointer-events:none;z-index:1;background:color-mix(in srgb,var(--surface) 92%,transparent);border-radius:8px;padding:3px 7px}
+.lanewrap .feed.blank{visibility:hidden}
+.lanemsg{z-index:2}
+.lyric{min-height:0}
+.lyric b{font-size:1.05rem}
 /* v0.8.11: the header always stays on one line */
 .top{flex-wrap:nowrap}
 .top .brand{font-size:clamp(1.05rem,5.4vw,1.35rem);white-space:nowrap;min-width:0}
@@ -430,25 +448,25 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
 
   <div class="view" id="viewPlay" hidden>
     <section class="pstage">
-      <svg id="pbox" class="cbox" viewBox="0 0 260 332" role="img" aria-labelledby="pName"></svg>
+      <svg id="pbox" class="cbox" viewBox="14 18 236 308" role="img" aria-labelledby="pName"></svg>
       <div class="pinfo">
         <div class="eyebrow">Now</div>
         <h2 id="pName">G</h2>
         <div class="quality" id="pQual">major</div>
         <div class="pnext">Then <span id="pNext"><b>C</b></span></div>
+        <div class="hype"><div class="combo"><b id="pCombo">×0</b><span>COMBO</span></div><div class="crowd"><span>CROWD</span><div class="cbars" id="pCrowd"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
       </div>
     </section>
-    <div class="hype"><div class="combo"><b id="pCombo">×0</b><span>COMBO</span></div><div class="crowd"><span>CROWD</span><div class="cbars" id="pCrowd"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div>
     <div class="lanewrap" id="laneWrap">
       <canvas id="lane" aria-label="Chord lane: chords scroll towards the line, strum when the ball lands"></canvas>
+      <div class="feed" id="pFeed" aria-live="polite">&nbsp;</div>
       <div class="lanemsg" id="laneMsg">Strum each time the ball lands. Change chord when a new block reaches the line.</div>
     </div>
     <div class="lyric" id="pLyric" hidden><span class="sec" id="pSec"></span><b id="pLyr"></b><span class="nextl" id="pLyrNext"></span></div>
     <div class="meterrow"><span>Early</span><canvas id="meter" aria-label="Strum timing, from early to late"></canvas><span>Late</span></div>
-    <div class="feed" id="pFeed" aria-live="polite">&nbsp;</div>
-    <div class="score" id="pScore"></div>
     <div class="importbar" id="importBar" hidden><span>Add <b id="importName"></b> to your songs?</span><div class="row"><button class="small" id="importAdd">Add it</button><button class="small" id="importNo">No thanks</button></div></div>
     <div class="gobar"><button class="btn big cog" id="bCog" aria-label="Song and settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button><button class="btn primary big" id="bGo">Start</button></div>
+    <div class="score" id="pScore"></div>
     <div class="seg" id="modeSeg" role="radiogroup" aria-label="How the lane moves">
       <button data-v="wait" role="radio">Wait for me</button><button data-v="keep" role="radio">Keep going</button>
     </div>
@@ -836,7 +854,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.12';
+const APP_VERSION = '0.8.13';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1437,7 +1455,7 @@ function finalizeDue(){
   }
 }
 
-function setFeed(text, st){ const f = $('pFeed'); f.className = 'feed ' + (st || ''); f.textContent = text || ' '; }
+function setFeed(text, st){ const f = $('pFeed'); f.className = 'feed ' + (st || '') + (text ? '' : ' blank'); f.textContent = text || ' '; }
 function showMsg(text, count){ const m = $('laneMsg'); m.textContent = text; m.className = 'lanemsg' + (count ? ' count' : ''); m.hidden = false; }
 function renderScore(){
   const s = T.stats, el = $('pScore');
@@ -1531,6 +1549,7 @@ function renderPlaySettings(){
   $('bCal').textContent = P.latency ? `Calibrate timing (${Math.round(P.latency * 1000)} ms)` : 'Calibrate timing';
   const hasWords = timeline().blocks.some(x => x.lyric || x.sec);
   $('pLyric').hidden = !hasWords;
+  $('viewPlay').classList.toggle('haswords', hasWords);
   T.shown = -1;
   save();
 }
@@ -1609,7 +1628,7 @@ function drawLane(){
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
   const b = beatNow(), ppb = Math.max(40, Math.min(78, w / 7)), nowX = Math.round(w * 0.22);
-  const top = 70, bot = h - 32, cur = blockAtBeat(Math.max(0, b));
+  const top = Math.round(h * 0.45), bot = h - 30, hk = (top - 16) / 54, cur = blockAtBeat(Math.max(0, b));
   const first = Math.max(0, blockAtBeat(Math.max(0, b - nowX / ppb)) - 1), last = blockAtBeat(Math.max(0, b + (w - nowX) / ppb)) + 1;
   for (let i = first; i <= last; i++){
     const B = blockInfo(i), x0 = nowX + (B.start - b) * ppb, xa = x0 - 6, xb = x0 + B.beats * ppb - 10;
@@ -1651,7 +1670,7 @@ function drawLane(){
   for (const f of T.floaters){
     const a = (nowMs - f.at) / 1100;
     g.globalAlpha = 1 - a; g.fillStyle = k.good; g.font = '700 14px Archivo, system-ui, sans-serif';
-    g.fillText(`+${f.n} fan${f.n === 1 ? '' : 's'}`, nowX + 22, 46 - a * 28);
+    g.fillText(`+${f.n} fan${f.n === 1 ? '' : 's'}`, nowX + 22, top * 0.66 - a * top * 0.4);
   }
   g.globalAlpha = 1;
   // the strum line
@@ -1660,8 +1679,8 @@ function drawLane(){
   g.globalAlpha = 1; T.flash *= 0.86;
   // the bouncing ball lands on every strum (on every beat during the count-in); longer gaps mean higher hops
   let y;
-  if (!T.running) y = top - 10 - 30;
-  else if (T.waiting) y = top - 10 - 7 * Math.abs(Math.sin(performance.now() / 170));
+  if (!T.running) y = top - 10 - 30 * hk;
+  else if (T.waiting) y = top - 10 - 7 * hk * Math.abs(Math.sin(performance.now() / 170));
   else {
     let a = Math.floor(b), z = a + 1;
     if (b >= 0){
@@ -1671,9 +1690,9 @@ function drawLane(){
     }
     const gap = z - a, frac = Math.min(1, Math.max(0, (b - a) / gap));
     const H = Math.min(46, 16 + 24 * gap) + (isChange(z) ? 4 : 0);
-    y = top - 10 - H * Math.sin(Math.PI * frac);
+    y = top - 10 - H * hk * Math.sin(Math.PI * frac);
   }
-  const lift = (top - 10 - y) / 46;
+  const lift = (top - 10 - y) / (46 * hk);
   g.fillStyle = k.ink; g.globalAlpha = 0.15 * (1 - lift * 0.6);
   g.beginPath(); g.ellipse(nowX, top - 2, 10 - lift * 4, 3, 0, 0, Math.PI * 2); g.fill();
   g.globalAlpha = 1; g.fillStyle = k.pulse;
