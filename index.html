@@ -246,6 +246,9 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .gobar{display:grid;grid-template-columns:54px minmax(0,1fr);gap:8px}
 .gobar .btn.big{min-height:54px}
 .gobar .cog{padding:0}
+/* left-handed: Start/Stop moves to the strumming-hand side (left), the cog to the right */
+.lefty .gobar{grid-template-columns:minmax(0,1fr) 54px}
+.lefty .gobar .cog{order:2}
 .gobar .cog svg{width:24px;height:24px}
 #viewPlay{padding-bottom:76px}
 /* v0.8.3: the header slides away while scrolling down and comes back on the way up */
@@ -840,7 +843,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.9';
+const APP_VERSION = '0.8.10';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -934,6 +937,7 @@ function render(){
   $('tab').innerHTML = order.map(s => `<span>${STR_NAMES[s]}</span>`).join('') +
     order.map(s => ch.frets[s] == null ? '<b class="x">x</b>' : `<b>${ch.frets[s]}</b>`).join('');
   $('tLefty').setAttribute('aria-pressed', state.lefty);
+  document.body.classList.toggle('lefty', !!state.lefty);
   $('tNotes').setAttribute('aria-pressed', state.notes);
   $('groups').innerHTML = GROUPS.map(([g, t]) => `<button class="grp" role="tab" data-g="${g}" aria-selected="${g === state.group}">${t}</button>`).join('');
   $('chips').innerHTML = CHORDS.map((c, i) => c.group !== state.group ? '' :
