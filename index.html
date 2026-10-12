@@ -595,7 +595,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
         <p class="hint">Aim for the bar to reach the middle when you strum hard. Red means too loud: turn the interface’s gain down.</p>
         <label class="field">Guitar tone (for recordings)<select id="toneSel"><option value="clean">Clean</option><option value="warm">Warm amp</option><option value="crunch">Crunchy rock</option></select></label>
         <button class="pill" id="tMonitor" aria-pressed="false">Hear my guitar through the phone</button>
-        <p class="hint">For an electric guitar with headphones in the interface or phone. The phone adds a small delay, so turn this off if it feels laggy.</p>
+        <p class="hint">For an electric guitar with headphones in the interface or phone. The phone adds a small delay, so turn this off if it feels laggy. <span id="delayNote"></span></p>
       </div>
       <p class="hint" id="rampInfo"></p>
       <p class="hint" id="pMic"></p>
@@ -974,7 +974,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.15.2';
+const APP_VERSION = '0.16.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1231,6 +1231,7 @@ async function openMic(){
   const raw = ctx.createAnalyser(); raw.fftSize = 4096; src.connect(raw);   // for the tuner
   mic = {stream, an, on, raw, src, label, direct, aec: wantAEC(), dev: state.micId || '', buf:new Float32Array(FRAME), obuf:new Float32Array(2048), rbuf:new Float32Array(4096)};
   if (direct){ mic.tone = buildTone(src); if (P.monitor) mic.tone.out.connect(ctx.destination); }
+  useLatencyFor();
   renderDirect();
   listMics();
   micTimer = setInterval(micTick, 80);
@@ -1284,6 +1285,27 @@ function renderDirect(){
   $('directName').textContent = mic.label || 'USB input';
   $('toneSel').value = P.tone;
   $('tMonitor').setAttribute('aria-pressed', P.monitor);
+  const sd = soundDelay();
+  $('delayNote').textContent = sd ? `On this phone: about ${sd.total} ms (${sd.verdict}).` : '';
+}
+// Each input keeps its own timing calibration: the phone mic, and each cable or interface by name.
+const latencyKey = () => mic && mic.direct ? 'direct:' + (mic.label || 'usb') : 'mic';
+const inputName = () => mic && mic.direct ? 'guitar cable' : 'phone mic';
+function useLatencyFor(){
+  const L = P.latencies = P.latencies || {};
+  if (L.mic == null) L.mic = P.latency || 0;                 // the single value saved by older versions belongs to the phone mic
+  const v = L[latencyKey()];
+  P.latency = v != null ? v : mic && mic.direct ? 0 : L.mic;
+  if (!$('viewPlay').hidden && !T.running) renderPlaySettings();
+}
+// How long the phone takes to play sound you feed it: the output delay plus the input delay.
+// That's what "hear my guitar through the phone" costs. Under 20 ms feels instant.
+function soundDelay(){
+  if (!ctx) return null;
+  const outMs = ((ctx.baseLatency || 0) + (ctx.outputLatency || 0)) * 1000;
+  const set = mic && mic.stream.getAudioTracks()[0] && mic.stream.getAudioTracks()[0].getSettings ? mic.stream.getAudioTracks()[0].getSettings() : {};
+  const inMs = (set.latency || 0) * 1000, total = Math.round(outMs + inMs);
+  return {outMs: Math.round(outMs), inMs: Math.round(inMs), total, verdict: total < 20 ? 'feels instant' : total < 45 ? 'slightly noticeable' : 'laggy: use the interface’s own headphone socket'};
 }
 // Lets you pick the phone's own mic when headphones with a mic are plugged in (only shown if there's a choice).
 async function listMics(){
@@ -1789,7 +1811,8 @@ function renderPlaySettings(){
   $('modeHint').textContent = P.mode === 'wait'
     ? 'At each new chord the lane listens for a moment, and if it hasn’t heard the chord yet it stops and waits. Tap the lane to skip one.'
     : 'The lane keeps moving. Each chord is scored on the right notes and on strumming as it reaches the line.';
-  $('bCal').textContent = P.latency ? `Calibrate timing (${Math.round(P.latency * 1000)} ms)` : 'Calibrate timing';
+  const calSet = (P.latencies || {})[latencyKey()] != null;
+  $('bCal').textContent = calSet ? `Calibrate timing (${inputName()}: ${Math.round(P.latency * 1000)} ms)` : mic ? `Calibrate timing for the ${inputName()}` : 'Calibrate timing';
   const hasWords = timeline().blocks.some(x => x.lyric || x.sec);
   $('pLyric').hidden = !hasWords;
   $('viewPlay').classList.toggle('haswords', hasWords);
@@ -1826,7 +1849,8 @@ async function calibrate(){
     else {
       d.sort((a, b) => a - b);
       P.latency = Math.max(-0.05, Math.min(0.4, d[d.length >> 1]));
-      showMsg(`Done. Your strums reach the app ${Math.round(P.latency * 1000)} ms after the click, and scoring now allows for that.`);
+      (P.latencies = P.latencies || {})[latencyKey()] = P.latency;
+      showMsg(`Done. With the ${inputName()}, your strums reach the app ${Math.round(P.latency * 1000)} ms after the click, and scoring now allows for that.`);
     }
     renderPlaySettings();
     closeMicIfIdle();
@@ -3316,7 +3340,7 @@ function renderDev(){
   if (!state.dev) return;
   const v = venueIndex(TOUR().fans);
   $('devVenue').innerHTML = VENUES.map((x, i) => `<option value="${i}"${i === v ? ' selected' : ''}>${i + 1}. ${x.name} (${fmt(x.fans)} fans)</option>`).join('');
-  $('devInfo').textContent = `${fmt(TOUR().fans)} fans · ${Object.keys(TOUR().stickers).length}/${STICKERS.length} stickers · ${tourDays()} tour days · ${(state.shows || []).length} shows · storage ${storageSafe ? 'protected' : 'not protected'} · timing offset ${Math.round(P.latency * 1000)} ms · background detection ${SEG.ready ? `${Math.round(SEG.avg)} ms per frame${SEG.every ? `, checked every ${SEG.every} ms` : ', every frame'}` : 'not loaded yet'}`;
+  $('devInfo').textContent = `${fmt(TOUR().fans)} fans · ${Object.keys(TOUR().stickers).length}/${STICKERS.length} stickers · ${tourDays()} tour days · ${(state.shows || []).length} shows · storage ${storageSafe ? 'protected' : 'not protected'} · timing offset ${Math.round(P.latency * 1000)} ms (${inputName()}; calibrated for: ${Object.keys(P.latencies || {}).map(k => k === 'mic' ? 'phone mic' : k.slice(7)).join(', ') || 'none'}) · sound delay ${(sd => sd ? `${sd.total} ms (output ${sd.outMs} + input ${sd.inMs}), ${sd.verdict}` : 'start audio first')(soundDelay())} · background detection ${SEG.ready ? `${Math.round(SEG.avg)} ms per frame${SEG.every ? `, checked every ${SEG.every} ms` : ', every frame'}` : 'not loaded yet'}`;
 }
 window.renderDev = renderDev;
 const devDo = (msg, f) => () => { f(); save(); renderTour(); renderStreak(); devToast(msg); };
