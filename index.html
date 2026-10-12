@@ -959,7 +959,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.14.3';
+const APP_VERSION = '0.14.4';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -3229,7 +3229,7 @@ function renderDev(){
   if (!state.dev) return;
   const v = venueIndex(TOUR().fans);
   $('devVenue').innerHTML = VENUES.map((x, i) => `<option value="${i}"${i === v ? ' selected' : ''}>${i + 1}. ${x.name} (${fmt(x.fans)} fans)</option>`).join('');
-  $('devInfo').textContent = `${fmt(TOUR().fans)} fans · ${Object.keys(TOUR().stickers).length}/${STICKERS.length} stickers · ${tourDays()} tour days · ${(state.shows || []).length} shows · storage ${storageSafe ? 'protected' : 'not protected'} · timing offset ${Math.round(P.latency * 1000)} ms`;
+  $('devInfo').textContent = `${fmt(TOUR().fans)} fans · ${Object.keys(TOUR().stickers).length}/${STICKERS.length} stickers · ${tourDays()} tour days · ${(state.shows || []).length} shows · storage ${storageSafe ? 'protected' : 'not protected'} · timing offset ${Math.round(P.latency * 1000)} ms · background detection ${SEG.ready ? `${Math.round(SEG.avg)} ms per frame${SEG.every ? `, checked every ${SEG.every} ms` : ', every frame'}` : 'not loaded yet'}`;
 }
 window.renderDev = renderDev;
 const devDo = (msg, f) => () => { f(); save(); renderTour(); renderStreak(); devToast(msg); };
