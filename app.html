@@ -454,7 +454,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
       <div class="row"><button class="small" id="devAllStickers">Unlock all stickers</button><button class="small" id="devNoStickers">Clear stickers</button></div>
       <div class="row"><button class="small" id="devBackupDue">Make backup reminder due</button><button class="small" id="devHistory">Add 10 days of practice</button></div>
       <div class="row"><button class="small" id="devConfetti">Fire the confetti</button><button class="small" id="devStrum">Test strum on Chords</button></div>
-      <div class="row"><button class="small" id="devReset">Reset progress</button><button class="small" id="devOff">Turn test mode off</button></div>
+      <div class="row"><button class="small" id="devReset">Reset progress</button><button class="small" id="devWipe">Clear ALL data</button><button class="small" id="devOff">Turn test mode off</button></div>
       <p class="hint">Tap the version number 5 times to switch test mode on or off. Not included in 1.0 release builds.</p>
     </section>
     <!-- TEST-MODE-END -->
@@ -961,7 +961,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.15.1';
+const APP_VERSION = '0.15.2';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -3327,6 +3327,20 @@ $('devReset').onclick = () => {
   if (!devResetArmed){ devResetArmed = true; $('devReset').textContent = 'Tap again to reset'; setTimeout(() => { devResetArmed = false; $('devReset').textContent = 'Reset progress'; }, 3000); return; }
   ['tour', 'log', 'shows', 'changes', 'bests', 'quiz', 'lastBackup', 'backupSnooze'].forEach(k => delete state[k]);
   save(); location.reload();
+};
+// back to a brand-new install: saved data, offline copy and all
+let devWipeArmed = false;
+$('devWipe').onclick = async () => {
+  if (!devWipeArmed){
+    devWipeArmed = true; $('devWipe').textContent = 'Tap again: deletes everything';
+    setTimeout(() => { devWipeArmed = false; $('devWipe').textContent = 'Clear ALL data'; }, 3000);
+    return;
+  }
+  Object.keys(state).forEach(k => delete state[k]);       // so nothing saves the old data back on the way out
+  try { localStorage.clear(); } catch (e) {}
+  try { for (const k of await caches.keys()) await caches.delete(k); } catch (e) {}
+  try { for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister(); } catch (e) {}
+  location.reload();
 };
 $('devOff').onclick = () => { state.dev = false; save(); renderDev(); devToast('Test mode off.'); };
 renderDev();
