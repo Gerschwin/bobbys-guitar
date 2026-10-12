@@ -239,6 +239,12 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .devtag{font:700 .6rem var(--f-mono);letter-spacing:.1em;color:#0F0B16;background:var(--pulse);border-radius:6px;padding:2px 5px;margin-left:6px;vertical-align:middle}
 .devcard{border:2px dashed var(--pulse)}
 .devtoast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-weight:700;max-width:90vw;text-align:center}
+/* v0.15.0: direct guitar input */
+.directbox{border:1px solid var(--good);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.levelrow{display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted)}
+.level{flex:1;height:10px;border-radius:999px;background:var(--line);overflow:hidden}
+.level i{display:block;height:100%;width:0;background:var(--good);transition:width .08s linear}
+.level i.low{background:var(--muted)} .level i.hot{background:var(--bad)}
 /* v0.11.0: live shows */
 .live .pstage{display:none}
 .livestage{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#000;align-self:center;width:min(100%,max(200px,calc((100svh - 300px) * 0.75)))}
@@ -569,6 +575,15 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
         <label class="field grow">Live show look<select id="liveLook"><option value="lights">Stage lights</option><option value="backdrop">Stage backdrop behind you</option><option value="blur">Blur the background</option><option value="off">Plain camera</option></select></label>
       </div>
       <label class="field" id="micField" hidden>Microphone (pick the phone’s own mic if headphones have one)<select id="micPick"></select></label>
+      <div class="row"><button class="pill" id="tDirect" aria-pressed="false" hidden>Guitar plugged in directly</button></div>
+      <div class="directbox" id="directBox" hidden>
+        <b>Guitar plugged in: <span id="directName"></span></b>
+        <div class="levelrow"><span>Input level</span><div class="level"><i id="inLevel"></i></div></div>
+        <p class="hint">Aim for the bar to reach the middle when you strum hard. Red means too loud: turn the interface’s gain down.</p>
+        <label class="field">Guitar tone (for recordings)<select id="toneSel"><option value="clean">Clean</option><option value="warm">Warm amp</option><option value="crunch">Crunchy rock</option></select></label>
+        <button class="pill" id="tMonitor" aria-pressed="false">Hear my guitar through the phone</button>
+        <p class="hint">For an electric guitar with headphones in the interface or phone. The phone adds a small delay, so turn this off if it feels laggy.</p>
+      </div>
       <p class="hint" id="rampInfo"></p>
       <p class="hint" id="pMic"></p>
     </div>
@@ -946,7 +961,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.14.4';
+const APP_VERSION = '0.15.1';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1177,12 +1192,23 @@ function resetListen(){
 // Echo cancelling is on while the app itself is making music (backing band or rhythm guitar), so the phone's own
 // mic can hear the guitar while the band plays through the speaker. Otherwise it's off, for the cleanest sound.
 const wantAEC = () => !!(P.band || P.hear);
+// A guitar plugged in by USB (cable or interface) is a "direct" input: no room sound, so no echo cancelling,
+// and its own strum and tone handling. Spotted from the device name; it can be switched by hand too.
+const DIRECT_NAMES = /usb|guitar|irig|interface|focusrite|scarlett|behringer|ucg|line.?in|instrument|jamstik|boss|zoom|audient|presonus|m-?audio/i;
+const isDirectName = label => DIRECT_NAMES.test(label || '') && !/headset|earphone|bluetooth|hands.?free/i.test(label || '');
 async function openMic(){
-  if (mic && mic.aec === wantAEC() && mic.dev === (state.micId || '')) return mic;
+  if (mic && (mic.aec === wantAEC() || mic.direct) && mic.dev === (state.micId || '') && (state.directInput == null || state.directInput === mic.direct)) return mic;
   if (mic) dropMic();
   const audioC = {echoCancellation: wantAEC(), noiseSuppression: false, autoGainControl: false};
   if (state.micId) audioC.deviceId = {ideal: state.micId};
-  const stream = await navigator.mediaDevices.getUserMedia({audio: audioC});
+  let stream = await navigator.mediaDevices.getUserMedia({audio: audioC});
+  const label = (stream.getAudioTracks()[0] || {}).label || '';
+  const direct = state.directInput != null ? state.directInput : isDirectName(label);
+  if (direct && audioC.echoCancellation){   // a cable doesn't hear the speaker: reopen without echo cancelling
+    stream.getTracks().forEach(t => t.stop());
+    audioC.echoCancellation = false;
+    stream = await navigator.mediaDevices.getUserMedia({audio: audioC});
+  }
   audio();
   const src = ctx.createMediaStreamSource(stream), an = ctx.createAnalyser();
   an.fftSize = FRAME; src.connect(an);
@@ -1190,7 +1216,9 @@ async function openMic(){
   const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
   const on = ctx.createAnalyser(); on.fftSize = 2048; src.connect(lp); lp.connect(on);
   const raw = ctx.createAnalyser(); raw.fftSize = 4096; src.connect(raw);   // for the tuner
-  mic = {stream, an, on, raw, aec: wantAEC(), dev: state.micId || '', buf:new Float32Array(FRAME), obuf:new Float32Array(2048), rbuf:new Float32Array(4096)};
+  mic = {stream, an, on, raw, src, label, direct, aec: wantAEC(), dev: state.micId || '', buf:new Float32Array(FRAME), obuf:new Float32Array(2048), rbuf:new Float32Array(4096)};
+  if (direct){ mic.tone = buildTone(src); if (P.monitor) mic.tone.out.connect(ctx.destination); }
+  renderDirect();
   listMics();
   micTimer = setInterval(micTick, 80);
   if (!onsetRaf) onsetRaf = requestAnimationFrame(onsetLoop);
@@ -1198,11 +1226,51 @@ async function openMic(){
 }
 function dropMic(){
   clearInterval(micTimer); micTimer = null;
+  if (mic.tone) try { mic.tone.out.disconnect(); } catch (e) {}
   mic.stream.getTracks().forEach(t => t.stop()); mic = null;
 }
 function closeMicIfIdle(){
   if (!mic || listening || T.running || T.calibrating || TR.running || TUNER.on || LAB.on) return;
   dropMic();
+}
+// Guitar tone for a direct input, used for live-show recordings and for hearing yourself (never for chord checking):
+// a little drive, a speaker-cabinet filter and a touch of room reverb, so a plugged-in electric doesn't sound thin.
+function ampCurve(k){ const n = 2048, c = new Float32Array(n); for (let i = 0; i < n; i++){ const x = i / (n - 1) * 2 - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); } return c; }
+function roomIR(sec){
+  const sr = ctx.sampleRate, n = Math.floor(sr * sec), b = ctx.createBuffer(2, n, sr);
+  for (let ch = 0; ch < 2; ch++){ const d = b.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); }
+  return b;
+}
+function buildTone(src){
+  const hp = ctx.createBiquadFilter(), pre = ctx.createGain(), shaper = ctx.createWaveShaper(), cab = ctx.createBiquadFilter(), mid = ctx.createBiquadFilter();
+  const post = ctx.createGain(), dry = ctx.createGain(), wet = ctx.createGain(), verb = ctx.createConvolver(), out = ctx.createGain();
+  hp.type = 'highpass'; hp.frequency.value = 75; cab.type = 'lowpass'; cab.frequency.value = 5000; mid.type = 'peaking'; mid.frequency.value = 800; mid.Q.value = 0.8;
+  shaper.oversample = '2x'; verb.buffer = roomIR(1.6);
+  src.connect(hp); hp.connect(pre); pre.connect(shaper); shaper.connect(mid); mid.connect(cab); cab.connect(post);
+  post.connect(dry); post.connect(verb); verb.connect(wet); dry.connect(out); wet.connect(out);
+  const t = {out, set(kind){
+    const drive = kind === 'crunch' ? 22 : kind === 'warm' ? 5 : 0;
+    pre.gain.value = drive ? 1 + drive / 5 : 1; shaper.curve = drive ? ampCurve(drive) : null;
+    post.gain.value = drive ? 0.55 : 1; mid.gain.value = kind === 'crunch' ? 4 : kind === 'warm' ? 2 : 0;
+    wet.gain.value = kind === 'clean' ? 0.14 : 0.2; out.gain.value = 1.6;
+  }};
+  t.set(P.tone);
+  return t;
+}
+function showLevel(buf){
+  let peak = 0; for (let i = buf.length - 4096; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i]));
+  const db = peak > 0 ? 20 * Math.log10(peak) : -60, pct = Math.max(0, Math.min(100, (db + 48) / 48 * 100));
+  const bar = $('inLevel'); bar.style.width = pct + '%'; bar.className = peak > 0.95 ? 'hot' : pct < 30 ? 'low' : '';
+}
+function renderDirect(){
+  const box = $('directBox');
+  box.hidden = !(mic && mic.direct);
+  $('tDirect').setAttribute('aria-pressed', mic ? !!mic.direct : !!state.directInput);
+  $('tDirect').hidden = !mic;
+  if (box.hidden) return;
+  $('directName').textContent = mic.label || 'USB input';
+  $('toneSel').value = P.tone;
+  $('tMonitor').setAttribute('aria-pressed', P.monitor);
 }
 // Lets you pick the phone's own mic when headphones with a mic are plugged in (only shown if there's a choice).
 async function listMics(){
@@ -1216,6 +1284,7 @@ async function listMics(){
 }
 function micTick(){
   mic.an.getFloatTimeDomainData(mic.buf);
+  if (mic.direct && !$('directBox').hidden) showLevel(mic.buf);
   if (listening) listenTick(analyseFrame(mic.buf, ctx.sampleRate));
   if (T.running || TR.running){
     // Only listen to the sound since the latest strum, so the last chord's tail doesn't slow recognition down.
@@ -1329,7 +1398,7 @@ const PATTERNS = [
   {id:'push', name:'D, DU, D, DU', slots:'D.DUD.DU'},
 ];
 const P = Object.assign({song:'gcd', bpm:70, per:4, mode:'wait', strum:'beat', forgive:true, click:true, hear:false, band:false, latency:0,
-  ramp:false, rampStep:4, rampMax:140, vibrate:false, look:'lights'}, state.play || {});
+  ramp:false, rampStep:4, rampMax:140, vibrate:false, look:'lights', tone:'warm', monitor:false}, state.play || {});
 state.play = P;
 const T = {running:false, waiting:false, calibrating:false, counting:false, anchorTime:0, anchorBeat:0, barrier:0, nextClick:0,
   pending:0, evalIdx:0, results:new Map(), accs:new Map(), starts:new Map(), acc:null, okTicks:0,
@@ -1492,7 +1561,8 @@ function detectOnset(){
   const now = ctx.currentTime, base = Math.min(eOld, T.prevE || eOld);
   T.prevE = eNew;
   // a strum is a sudden jump in energy, even while the last strum is still ringing
-  if (eNew > 5e-5 && eNew > 3 * base && now - T.lastOnset > 0.12){
+  const direct = mic.direct, minE = direct ? 1e-5 : 5e-5, jump = direct ? 2.4 : 3;   // a pickup is cleaner and often quieter than the room mic
+  if (eNew > minE && eNew > jump * base && now - T.lastOnset > 0.12){
     T.lastOnset = now;
     T.onsets.push(now - 0.008);
     if (T.onsets.length > 40) T.used.delete(T.onsets.shift());
@@ -1697,6 +1767,7 @@ function renderPlaySettings(){
   $('tForgive').setAttribute('aria-pressed', P.forgive);
   $('tHear').setAttribute('aria-pressed', P.hear);
   $('tBand').setAttribute('aria-pressed', P.band);
+  renderDirect();
   $('liveLook').value = P.look;
   $('tRamp').setAttribute('aria-pressed', P.ramp);
   $('tVibrate').setAttribute('aria-pressed', P.vibrate);
@@ -2871,7 +2942,8 @@ function startRecording(){
   // the guitar reaches the mic a little late, so hold the app's own sound back by the same amount to keep them together
   LIVE.delay = ctx.createDelay(1); LIVE.delay.delayTime.value = Math.max(0, Math.min(0.9, P.latency));
   out.connect(LIVE.delay); LIVE.delay.connect(dest);
-  if (mic){ LIVE.micSrc = ctx.createMediaStreamSource(mic.stream); const g = ctx.createGain(); g.gain.value = 1.4; LIVE.micSrc.connect(g); g.connect(dest); }
+  if (mic && mic.tone){ LIVE.micSrc = mic.tone.out; mic.tone.out.connect(dest); }        // plugged-in guitar: with its tone
+  else if (mic){ LIVE.micSrc = ctx.createMediaStreamSource(mic.stream); const g = ctx.createGain(); g.gain.value = 1.4; LIVE.micSrc.connect(g); g.connect(dest); }
   const stream = new MediaStream([...$('stageCv').captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
   LIVE.mime = ['video/mp4;codecs=avc1,mp4a', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
   LIVE.chunks = []; LIVE.best = 0; LIVE.t0 = performance.now();
@@ -2892,10 +2964,13 @@ function finishShow(){
   const rec = LIVE.rec; LIVE.rec = null; LIVE.tail = true;
   $('bGo').disabled = true;
   setTimeout(() => {                                  // keep filming the applause for a few seconds
-    rec.onstop = () => showResult(rec.mimeType || LIVE.mime);
+    let done = false;
+    const finish = () => { if (done) return; done = true; showResult(rec.mimeType || LIVE.mime); };
+    rec.onstop = finish;
     rec.stop();
+    setTimeout(() => { if (LIVE.chunks.length) finish(); }, 3000);   // backstop if a busy phone is slow to hand the file over
     try { out.disconnect(LIVE.delay); } catch (e) {}
-    if (LIVE.micSrc) try { LIVE.micSrc.disconnect(); } catch (e) {}
+    if (LIVE.micSrc) try { LIVE.micSrc === (mic && mic.tone && mic.tone.out) ? LIVE.micSrc.disconnect(LIVE.dest) : LIVE.micSrc.disconnect(); } catch (e) {}
     $('bGo').disabled = false;
   }, 4500);
 }
@@ -3131,6 +3206,18 @@ function backdrop(vi, W, H){
   }
   return SEG.backdrops[vi] = c;
 }
+$('tDirect').onclick = async () => {
+  const now = state.directInput != null ? state.directInput : !!(mic && mic.direct);
+  state.directInput = !now; save();
+  if (mic){ const keep = listening || T.running || TR.running || TUNER.on; dropMic(); if (keep) await openMic(); }
+  renderDirect();
+};
+$('toneSel').onchange = e => { P.tone = e.target.value; save(); if (mic && mic.tone) mic.tone.set(P.tone); };
+$('tMonitor').onclick = () => {
+  P.monitor = !P.monitor; save();
+  if (mic && mic.tone){ try { mic.tone.out.disconnect(ctx.destination); } catch (e) {} if (P.monitor) mic.tone.out.connect(ctx.destination); }
+  renderDirect();
+};
 $('liveLook').onchange = async e => {
   P.look = e.target.value; save();
   if (!needsSeg()) return;
