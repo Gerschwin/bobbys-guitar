@@ -239,6 +239,22 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .devtag{font:700 .6rem var(--f-mono);letter-spacing:.1em;color:#0F0B16;background:var(--pulse);border-radius:6px;padding:2px 5px;margin-left:6px;vertical-align:middle}
 .devcard{border:2px dashed var(--pulse)}
 .devtoast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-weight:700;max-width:90vw;text-align:center}
+/* v0.17.0: help */
+.topright{display:flex;align-items:center;gap:8px;flex:none}
+.helpbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 1rem var(--f-body);display:grid;place-items:center}
+.helpq{width:24px;height:24px;min-width:24px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--muted);font:700 .75rem var(--f-body);display:inline-grid;place-items:center;margin-left:6px;vertical-align:middle;padding:0;text-transform:none;letter-spacing:0}
+.helphead{display:flex;align-items:center;gap:12px}
+.helpsearch{font:inherit;font-size:1rem;color:var(--ink);background:var(--raise);border:1px solid var(--line);border-radius:12px;min-height:46px;padding:0 14px}
+.helplist{display:flex;flex-direction:column;gap:8px}
+.helplist details{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 16px}
+.helplist summary{font-weight:700;padding:15px 0;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.helplist summary::-webkit-details-marker{display:none}
+.helplist summary::after{content:"+";color:var(--accent);font-size:1.2rem;line-height:1}
+.helplist details[open] summary::after{content:"–"}
+.helpbody{padding-bottom:14px;color:var(--ink);line-height:1.5}
+.helpbody p{margin:0 0 10px}
+.helpbody ol,.helpbody ul{margin:0 0 10px;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.helpbody b{color:var(--ink)}
 /* v0.15.0: direct guitar input */
 .directbox{border:1px solid var(--good);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
 .levelrow{display:flex;align-items:center;gap:10px;font-size:.8rem;color:var(--muted)}
@@ -405,10 +421,11 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
 <div class="app">
   <header class="top">
     <div class="brand">BOBBY’S GUITAR <span class="ver" id="ver"></span><!-- TEST-MODE-START --><span class="devtag" id="devTag" hidden>TEST</span><!-- TEST-MODE-END --></div>
+    <div class="topright"><button class="helpbtn" id="bHelp" aria-label="Help">?</button>
     <button class="streak" id="streakChip" aria-label="Tour days in a row">
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--pulse)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5 1-8.5z"/></svg>
       <b id="streakN">0</b><span>tour days</span>
-    </button>
+    </button></div>
   </header>
 
   <div class="view" id="viewTour" hidden>
@@ -424,7 +441,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
       <div class="route" id="vRoute"></div>
     </section>
     <section class="card">
-      <h2>Tonight’s setlist</h2>
+      <h2>Tonight’s setlist <button class="helpq" data-help="tour" aria-label="Help: On Tour">?</button></h2>
       <div class="setlist" id="setlist"></div>
       <p class="hint" id="setlistNote"></p>
     </section>
@@ -459,14 +476,14 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     </section>
     <!-- TEST-MODE-END -->
     <section class="card">
-      <h2>Live shows</h2>
+      <h2>Live shows <button class="helpq" data-help="live" aria-label="Help: live shows">?</button></h2>
       <p class="hint" id="liveInfo"></p>
       <button class="btn primary" id="bGoLive">Go live</button>
       <p class="hint" id="showTrend"></p>
       <ul class="shows" id="showList"></ul>
     </section>
     <section class="card">
-      <h2>Backup</h2>
+      <h2>Backup <button class="helpq" data-help="backup" aria-label="Help: backups">?</button></h2>
       <p class="hint" id="backupInfo"></p>
       <div class="row"><button class="btn primary" id="bBackup">Save a backup</button><label class="btn" id="restoreLabel">Restore<input type="file" id="restoreFile" accept=".txt,.json,text/plain,application/json"></label></div>
       <details class="paste"><summary>Paste a backup instead</summary>
@@ -500,6 +517,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     <div class="verdict" id="verdict">Strum the chord and let it ring.</div>
     <div class="chroma" id="chroma"></div>
     <div class="legend"><span><i style="background:var(--accent)"></i>notes this chord needs</span><span><i style="background:var(--line)"></i>other notes heard</span></div>
+    <p class="hint">Not working? <button class="helpq" data-help="trouble" aria-label="Help: troubleshooting">?</button></p>
     <p class="hint" id="hint">Hold the phone near the guitar's sound hole. A quiet room helps.</p>
     <div class="row">
       <label class="small" id="upLabel"><input type="file" id="upload" accept="audio/*">Check a recording</label>
@@ -509,7 +527,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
 
   <section class="shelf" aria-label="Choose a chord">
     <p class="tip" id="tip"></p>
-    <div class="stagebar"><select id="capo" class="capo" aria-label="Capo"></select><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
+    <div class="stagebar"><button class="helpq" data-help="diagram" aria-label="Help: reading a chord diagram">?</button><select id="capo" class="capo" aria-label="Capo"></select><button class="pill" id="tLefty" aria-pressed="false">Left-handed</button><button class="pill" id="tNotes" aria-pressed="false">Note names</button></div>
 
     <div class="groups" id="groups" role="tablist"></div>
     <div class="chips" id="chips"></div>
@@ -553,7 +571,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     </div>
     <p class="hint" id="modeHint"></p>
     <div class="settings">
-      <div class="field"><label for="song">Song</label><select id="song"></select>
+      <div class="field"><label for="song">Song <button class="helpq" data-help="songs" aria-label="Help: songs">?</button></label><select id="song"></select>
         <span class="songinfo" id="songInfo"></span>
         <div class="row"><button class="small" id="bNewSong">New song</button><button class="small" id="bEditSong">Edit</button><button class="small" id="bDelSong">Delete</button><button class="small" id="bShare">Share</button></div>
         <textarea id="shareOut" class="shareout" rows="3" readonly hidden></textarea>
@@ -564,18 +582,18 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
       <div class="row">
         <button class="pill" id="tForgive" aria-pressed="true">Forgiving</button>
         <button class="pill" id="tClick" aria-pressed="true">Click</button>
-        <button class="pill" id="tBand" aria-pressed="false">Backing band</button>
+        <button class="pill" id="tBand" aria-pressed="false">Backing band</button><button class="helpq" data-help="band" aria-label="Help: backing band">?</button>
         <button class="pill" id="tHear" aria-pressed="false">Play the chord too</button>
         <button class="pill" id="tRamp" aria-pressed="false">Speed up each time</button>
         <button class="pill" id="tVibrate" aria-pressed="false">Vibrate on beat</button>
-        <button class="small" id="bCal">Calibrate timing</button>
+        <button class="small" id="bCal">Calibrate timing</button><button class="helpq" data-help="calibrate" aria-label="Help: timing calibration">?</button>
         <button class="small" id="bGoLive2">Go live: record a show</button>
       </div>
       <div class="row">
-        <label class="field grow">Live show look<select id="liveLook"><option value="lights">Stage lights</option><option value="backdrop">Stage backdrop behind you</option><option value="blur">Blur the background</option><option value="off">Plain camera</option></select></label>
+        <label class="field grow"><span>Live show look <button class="helpq" data-help="live" aria-label="Help: live show looks">?</button></span><select id="liveLook"><option value="lights">Stage lights</option><option value="backdrop">Stage backdrop behind you</option><option value="blur">Blur the background</option><option value="off">Plain camera</option></select></label>
       </div>
       <label class="field" id="micField" hidden>Microphone (pick the phone’s own mic if headphones have one)<select id="micPick"></select></label>
-      <div class="row"><button class="pill" id="tDirect" aria-pressed="false" hidden>Guitar plugged in directly</button></div>
+      <div class="row"><button class="pill" id="tDirect" aria-pressed="false" hidden>Guitar plugged in directly</button><button class="helpq" data-help="plugin" aria-label="Help: plugging in a guitar">?</button></div>
       <div class="directbox" id="directBox" hidden>
         <b>Guitar plugged in: <span id="directName"></span></b>
         <div class="levelrow"><span>Input level</span><div class="level"><i id="inLevel"></i></div></div>
@@ -610,9 +628,16 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
     </section>
   </div>
 
+  <div class="view" id="viewHelp" hidden>
+    <div class="helphead"><button class="small" id="helpBack">‹ Back</button><h2 class="etitle">Help</h2></div>
+    <input type="search" id="helpSearch" class="helpsearch" placeholder="Search help, e.g. timing, mic, capo" aria-label="Search help">
+    <div class="helplist" id="helpList"></div>
+    <p class="hint" id="helpNone" hidden>Nothing matches. Try a simpler word, like “mic” or “timing”.</p>
+  </div>
+
   <div class="view" id="viewPractice" hidden>
     <section class="card" id="cardTuner">
-      <h2>Tuner</h2>
+      <h2>Tuner <button class="helpq" data-help="practice" aria-label="Help: practice tools">?</button></h2>
       <div class="tuner" id="tuner">
         <svg id="tMeter" viewBox="0 -20 300 130" aria-hidden="true">
           <path class="tarc" d="M40 96 A110 110 0 0 1 260 96"/>
@@ -961,7 +986,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.16.0';
+const APP_VERSION = '0.17.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -2003,7 +2028,7 @@ const VIEWS = ['chords', 'play', 'edit', 'practice'];
 function showView(v){
   const isPlay = v === 'play';
   $('viewChords').hidden = v !== 'chords'; $('viewPlay').hidden = !isPlay;
-  $('viewEdit').hidden = v !== 'edit'; $('viewPractice').hidden = v !== 'practice'; $('viewTour').hidden = v !== 'tour';
+  $('viewEdit').hidden = v !== 'edit'; $('viewPractice').hidden = v !== 'practice'; $('viewTour').hidden = v !== 'tour'; $('viewHelp').hidden = v !== 'help';
   $('tabChords').setAttribute('aria-selected', v === 'chords');
   $('tabPlay').setAttribute('aria-selected', v === 'play' || v === 'edit');
   $('tabPractice').setAttribute('aria-selected', v === 'practice');
@@ -2017,7 +2042,8 @@ function showView(v){
   }
   if (v === 'practice') renderPractice();
   if (v === 'tour') renderTour();
-  state.view = v === 'edit' ? 'play' : v; save();
+  if (v !== 'help') state.view = v === 'edit' ? 'play' : v;
+  save();
   window.scrollTo(0, 0);
   maybeShowReward();
 }
@@ -3370,6 +3396,120 @@ $('devOff').onclick = () => { state.dev = false; save(); renderDev(); devToast('
 renderDev();
 // TEST-MODE-END
 
+/* ---------- help guide ---------- */
+const HELP = [
+  ['start', 'Getting started', `
+    <p>Bobby’s Guitar teaches you chords, checks your playing through the microphone, and lets you strum along to songs.</p>
+    <ol><li><b>Install it:</b> in Chrome, tap the ⋮ menu, then <b>Install app</b> (or Add to Home screen). It then works offline.</li>
+    <li><b>Allow the microphone</b> when it asks. That’s how it hears your guitar. Nothing is recorded or sent anywhere.</li>
+    <li><b>Put the phone close:</b> about an arm’s length away, with the bottom edge (where the mic is) facing the guitar. A quiet room helps.</li>
+    <li><b>Tune up</b> in Practice → Tuner, then run <b>Calibrate timing</b> once in Play along.</li></ol>
+    <p>Updates arrive by themselves: close the app fully and open it again while online. The version number is at the top of the screen.</p>`],
+  ['diagram', 'Reading a chord diagram', `
+    <ul><li>The six up-and-down lines are the strings: <b>low E on the left</b> (the thickest) to <b>high e on the right</b>. Left-handed mode flips it.</li>
+    <li>The lines across are the frets. The thick bar at the top is the nut, the end of the neck.</li>
+    <li>A <b>numbered dot</b> means: press that string just behind that fret with that finger. 1 is your index finger, 2 middle, 3 ring, 4 little finger.</li>
+    <li><b>○</b> above a string: play it open, with no finger on it. <b>×</b>: don’t play that string.</li>
+    <li>A long bar across several strings is a <b>barre</b>: one finger pressed flat across all of them.</li>
+    <li>The numbers under the chord name (like 3 2 0 0 0 3) are the frets from low E to high e; x means skip that string.</li></ul>
+    <p>In Play along and Practice, a ring round a dot means that finger can stay where it is for the next chord.</p>`],
+  ['chords', 'The Chords tab', `
+    <ul><li>Pick a chord from the list, swipe the diagram, or use the ‹ › buttons.</li>
+    <li><b>Strum</b> plays the chord. <b>Pick</b> plays one string at a time, so you can check each one.</li>
+    <li><b>Listen:</b> strum the chord and let it ring. The name turns green with confetti when it’s right; if not, it says what it heard and which string to check.</li>
+    <li>Below the buttons: a tip for the chord, <b>Capo</b>, <b>Left-handed</b>, and <b>Note names</b> (note letters instead of finger numbers).</li>
+    <li>With a capo, the shapes stay the same and the app tells you what the chord sounds as.</li></ul>`],
+  ['play', 'Play along', `
+    <ol><li>Tap the cog to choose a song, strum pattern and tempo.</li>
+    <li>Press <b>Start</b>. Four clicks count you in.</li>
+    <li>Chords scroll towards the line. <b>Strum each time the ball lands</b> (the arrows show down ↓ and up ↑ strums) and change chord when a new block reaches the line.</li></ol>
+    <ul><li><b>Wait for me</b> stops at each new chord until it hears it. Best for learning the changes.</li>
+    <li><b>Keep going</b> never stops, and scores right chords and strum timing: green is on time, amber is close, red is off.</li>
+    <li><b>Forgiving</b> still counts a chord with a muted string. Turn it off for a challenge.</li>
+    <li><b>Speed up each time</b> adds a few bpm every time round the song.</li>
+    <li>The <b>Early / Late</b> meter shows whether you’re rushing or dragging. If everything shows late, calibrate your timing.</li></ul>`],
+  ['calibrate', 'Timing calibration', `
+    <p>Every phone (and every guitar cable) takes a moment to hear you. Calibrating measures that delay, so “on time” really means on time.</p>
+    <ol><li>Play along → cog → <b>Calibrate timing</b>.</li>
+    <li>Strum any chord on each of the 8 clicks.</li>
+    <li>Done. The button shows the result, for example “phone mic: 80 ms”.</li></ol>
+    <p>The phone mic and each guitar cable keep their own setting. Calibrate again if you change headphones, cable or phone, or if your timing always looks early or late.</p>`],
+  ['band', 'Backing band and rhythm guitar', `
+    <ul><li><b>Backing band</b> adds drums and bass under the song. <b>Play the chord too</b> adds a rhythm guitar that follows the strum pattern.</li>
+    <li>You can play through the phone’s speaker: the app takes its own sound out of what the mic hears. If chords stop being recognised, turn the volume down a little or use headphones.</li>
+    <li><b>Click</b> is the metronome. It’s never included in live-show videos.</li></ul>`],
+  ['songs', 'Songs: built-in, your own and sharing', `
+    <ul><li><b>Warm-ups</b> are short chord drills; <b>Songs</b> are real songs. Traditional songs include lyrics. Modern songs’ lyrics are copyrighted, so only the chords and sections are included.</li>
+    <li><b>New song:</b> name it and tap chords to add them. Tap a chord in your song to set how many beats it lasts, start a section (Verse, Chorus), add a lyric line, or move or remove it.</li>
+    <li><b>Copy to edit</b> makes your own copy of a built-in song, for example to type in the lyrics.</li>
+    <li><b>Share</b> sends a link; anyone who opens it can add the song to their app.</li></ul>`],
+  ['practice', 'Practice: tuner, changes and quiz', `
+    <ul><li><b>Tuner:</b> play one open string. The needle shows whether it’s sharp (right) or flat (left); tune until it goes green. Tap a string letter to hear its note, or to tune just that string.</li>
+    <li><b>One-minute changes:</b> pick two chords and switch between them as many times as you can in 60 seconds. It counts clean changes and shows which fingers can stay down.</li>
+    <li><b>Name that chord:</b> listen and pick the chord you heard. Great for training your ear.</li>
+    <li><b>Your progress:</b> minutes practised, tour days, your slowest chord changes and best scores.</li>
+    <li>The <b>Strum direction lab</b> is an experiment and may guess wrong.</li></ul>`],
+  ['tour', 'On Tour: fans, venues and stickers', `
+    <ul><li>Everything you play earns <b>fans</b>: clean chord changes, on-time strums, finished songs, practice minutes and quiz answers.</li>
+    <li>Fans move you up the venues, from the <b>Bedroom</b> to the <b>Stadium</b>. Each level-up brings a gig poster and a new <b>guitar finish</b> for your chord diagrams.</li>
+    <li><b>Tonight’s setlist:</b> three goals a day, plus 25 bonus fans for doing all three. Tap a goal to go straight to it.</li>
+    <li><b>Stickers</b> go on your guitar case when you hit milestones. Tap All stickers to see what’s left to earn.</li>
+    <li><b>Tour days</b> is your streak: practise for at least a minute a day. One rest day a week won’t break it.</li></ul>`],
+  ['live', 'Live shows', `
+    <ul><li>Unlocks at the <b>Open Mic</b> (500 fans).</li>
+    <li>Tap <b>Go live</b> (in the Tour tab or Play along’s settings) and allow the camera. You’ll see yourself with the stage on screen.</li>
+    <li>Choose a <b>look</b>: stage lights, a stage backdrop behind you, a blurred background, or the plain camera. Backdrop and blur download about 13 MB the first time.</li>
+    <li><b>Start the show</b> starts recording, and the crowd cheers as your combo builds. <b>End the show</b> brings the applause, then you can watch it back.</li>
+    <li>Tap <b>Save video</b> to share it or keep it. Videos aren’t kept inside the app, so save the ones you want.</li></ul>`],
+  ['plugin', 'Plugging in a guitar', `
+    <p>An electric guitar, or an acoustic with a pickup, can plug into the phone with a USB-C guitar cable or audio interface, such as an iRig, Behringer Guitar Link or Focusrite Scarlett.</p>
+    <ol><li>Plug it in, then go to Play along → cog. Pick it under <b>Microphone</b> if it isn’t already chosen.</li>
+    <li>The app shows <b>Guitar plugged in</b>. If it doesn’t recognise it, tap <b>Guitar plugged in directly</b>.</li>
+    <li>Strum hard and set the interface’s gain so the <b>level bar</b> reaches the middle, never red.</li>
+    <li><b>Calibrate timing</b> with the cable plugged in (it keeps its own setting).</li>
+    <li>Choose a <b>guitar tone</b> for recordings: Clean, Warm amp or Crunchy rock.</li></ol>
+    <p><b>Hearing yourself:</b> plug wired headphones into the interface’s own headphone socket and use its direct monitoring, which has no delay. “Hear my guitar through the phone” works too, but the phone adds a delay (shown underneath it). Don’t use Bluetooth headphones for this.</p>`],
+  ['backup', 'Backups and privacy', `
+    <ul><li>Everything stays on this phone: no account, nothing uploaded. The microphone and camera are only used while you’re using them.</li>
+    <li>Your progress lives in Chrome’s storage, so <b>clearing Chrome’s data</b>, uninstalling the app or changing phone can lose it.</li>
+    <li>Tour → <b>Backup</b> → <b>Save a backup</b>, then send it somewhere safe, like a WhatsApp chat with yourself or Google Drive. The app reminds you every week.</li>
+    <li>To get it back, use <b>Restore</b> with the backup file, or paste the backup text.</li></ul>`],
+  ['trouble', 'Troubleshooting', `
+    <ul><li><b>It can’t hear me:</b> check the microphone is allowed (phone Settings → Apps → Bobby’s Guitar or Chrome → Permissions), and move the phone closer.</li>
+    <li><b>It says the wrong chord:</b> tune up first, check every string rings (use Pick to compare), and don’t play strings marked ×. Very similar chords, like G and G7, can sometimes be mixed up.</li>
+    <li><b>My timing is always late or early:</b> run Calibrate timing again.</li>
+    <li><b>The band makes it miss my chords:</b> turn the volume down or use headphones.</li>
+    <li><b>The live video is jerky:</b> switch the look to Stage lights.</li>
+    <li><b>An update isn’t showing:</b> close the app fully and open it again while online, then check the version number at the top.</li>
+    <li><b>Something seems stuck:</b> close the app and open it again.</li></ul>`],
+];
+let helpFrom = 'tour';
+$('helpList').innerHTML = HELP.map(([id, title, body]) => `<details id="help-${id}"><summary>${title}</summary><div class="helpbody">${body}</div></details>`).join('');
+function openHelp(topic){
+  const visible = ['chords', 'play', 'practice', 'tour', 'edit'].find(v => !$('view' + v[0].toUpperCase() + v.slice(1)).hidden);
+  if (visible) helpFrom = visible === 'edit' ? 'play' : visible;
+  showView('help');
+  $('helpSearch').value = ''; filterHelp();
+  document.querySelectorAll('#helpList details').forEach(d => d.open = false);
+  const d = topic && $('help-' + topic);
+  if (d){ d.open = true; setTimeout(() => d.scrollIntoView({block: 'start'}), 50); }
+}
+function filterHelp(){
+  const q = $('helpSearch').value.trim().toLowerCase();
+  let any = false;
+  document.querySelectorAll('#helpList details').forEach(d => {
+    const hit = !q || d.textContent.toLowerCase().includes(q);
+    d.hidden = !hit; if (hit) any = true;
+    if (q) d.open = hit;
+  });
+  $('helpNone').hidden = any;
+}
+$('helpSearch').oninput = filterHelp;
+$('helpBack').onclick = () => showView(helpFrom);
+$('bHelp').onclick = () => openHelp(null);
+// the little "?" links beside tricky settings
+document.addEventListener('click', e => { const q = e.target.closest('.helpq'); if (q){ e.preventDefault(); e.stopPropagation(); openHelp(q.dataset.help); } }, true);
+
 /* ---------- wiring ---------- */
 $('bStrum').onclick = () => play('strum');
 $('bPick').onclick = () => play('pick');
@@ -3383,7 +3523,7 @@ $('tNotes').onclick = () => { state.notes = !state.notes; render(); };
 $('groups').onclick = e => { const b = e.target.closest('.grp'); if (b){ state.group = b.dataset.g; render(); } };
 $('chips').onclick = e => { const b = e.target.closest('.chip'); if (b) go(+b.dataset.i); };
 document.addEventListener('keydown', e => {
-  if (e.target.closest('input, select') || !$('viewEdit').hidden || !$('viewPractice').hidden || !$('viewTour').hidden || !$('intro').hidden || !$('reward').hidden) return;
+  if (e.target.closest('input, select') || !$('viewEdit').hidden || !$('viewPractice').hidden || !$('viewTour').hidden || !$('viewHelp').hidden || !$('intro').hidden || !$('reward').hidden) return;
   if (!$('viewPlay').hidden){
     if (e.key === ' ' && !e.target.closest('button')){ e.preventDefault(); T.running ? stopPlay() : startPlay(); }
     return;
