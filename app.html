@@ -222,6 +222,7 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
 /* v0.9.0: backup and restore */
+.nudge{background:var(--accent-soft);border:1px solid var(--accent);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-weight:600}
 #restoreLabel{position:relative}
 #restoreLabel input{position:absolute;width:1px;height:1px;opacity:0}
 .paste summary{cursor:pointer;color:var(--muted);font-size:.9rem}
@@ -377,6 +378,10 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
   </header>
 
   <div class="view" id="viewTour" hidden>
+    <div class="nudge" id="backupNudge" hidden>
+      <span id="nudgeText"></span>
+      <div class="row"><button class="btn primary" id="nudgeSave">Save a backup</button><button class="small" id="nudgeLater">Not now</button></div>
+    </div>
     <section class="card venue">
       <div class="mono" id="vLevel">NOW PLAYING · LEVEL 1 OF 7</div>
       <div class="vname" id="vName">THE BEDROOM</div>
@@ -871,7 +876,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.9.0';
+const APP_VERSION = '0.9.1';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -2529,6 +2534,11 @@ function renderTour(){
   $('stageName').value = t.name;
   $('tDaylight').setAttribute('aria-pressed', document.documentElement.dataset.theme === 'light');
   $('tKeepOn').setAttribute('aria-pressed', state.keepOn !== false);
+  const t0 = TOUR(), hasProgress = t0.fans >= 50 || Object.keys(t0.stickers).length > 0 || mySongs().length > 0;
+  const since = state.lastBackup ? Math.round((Date.parse(dayKey()) - Date.parse(state.lastBackup)) / 864e5) : null;
+  const nudge = hasProgress && (since == null || since >= 7) && !(state.backupSnooze && dayKey() < state.backupSnooze);
+  $('backupNudge').hidden = !nudge;
+  if (nudge) $('nudgeText').textContent = since == null ? 'Keep your progress safe: save a backup copy you can restore on any phone.' : `It’s been ${since} days since your last backup.`;
   $('backupInfo').textContent = (storageSafe ? 'Your progress is protected from the phone’s automatic clean-ups. ' : '') +
     'A backup copy keeps it safe if Chrome is cleared or you change phone. Last backup: ' +
     (state.lastBackup ? new Date(state.lastBackup + 'T12:00').toLocaleDateString(undefined, {day: 'numeric', month: 'long', year: 'numeric'}) : 'never') + '.';
@@ -2554,7 +2564,7 @@ async function protectStorage(){
 }
 addEventListener('pointerdown', () => { if (!storageSafe) protectStorage(); }, {once: true, passive: true});
 const backupMsg = t => { $('backupMsg').textContent = t; };
-$('bBackup').onclick = async () => {
+async function doBackup(){
   const name = `bobbys-guitar-backup-${dayKey()}.txt`;
   const text = JSON.stringify({app: 'bobbys-guitar', format: 1, saved: new Date().toISOString(), appVersion: APP_VERSION, state});
   const file = new File([text], name, {type: 'text/plain'});
@@ -2569,7 +2579,10 @@ $('bBackup').onclick = async () => {
   a.href = URL.createObjectURL(file); a.download = name; document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   done(`Backup saved to your Downloads folder as ${name}.`);
-};
+}
+$('bBackup').onclick = doBackup;
+$('nudgeSave').onclick = doBackup;
+$('nudgeLater').onclick = () => { const d = new Date(); d.setDate(d.getDate() + 3); state.backupSnooze = dayKey(d); save(); renderTour(); };
 let pendingRestore = null;
 function offerRestore(text){
   pendingRestore = null; $('bRestoreGo').hidden = true;
