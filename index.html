@@ -959,7 +959,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.14.2';
+const APP_VERSION = '0.14.3';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -3022,11 +3022,12 @@ function segMask(v){
 function writeMask(d, mw, mh){
   const c = SEG.maskCv, cx = c.getContext('2d');
   if (c.width !== mw || c.height !== mh){ c.width = mw; c.height = mh; SEG.img = cx.createImageData(mw, mh); SEG.prev = null; }
-  // blend with the last mask so the edge doesn't jump about between frames
+  // smooth out small wobbles (flicker) but follow real movement straight away, so the outline doesn't lag
   if (!SEG.prev || SEG.prev.length !== d.length) SEG.prev = Float32Array.from(d);
   const prev = SEG.prev, px = SEG.img.data;
   for (let i = 0; i < d.length; i++){
-    const m = prev[i] = prev[i] * 0.45 + d[i] * 0.55;
+    const diff = Math.abs(d[i] - prev[i]);
+    const m = prev[i] = diff > 0.25 ? d[i] : prev[i] * 0.3 + d[i] * 0.7;
     const t = Math.max(0, Math.min(1, (m - 0.15) / 0.7));
     px[i * 4 + 3] = t * t * (3 - 2 * t) * 255;          // smooth ramp: unsure pixels are partly see-through
   }
