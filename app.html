@@ -565,6 +565,9 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
         <button class="small" id="bCal">Calibrate timing</button>
         <button class="small" id="bGoLive2">Go live: record a show</button>
       </div>
+      <div class="row">
+        <label class="field grow">Live show look<select id="liveLook"><option value="lights">Stage lights</option><option value="off">Plain camera</option></select></label>
+      </div>
       <label class="field" id="micField" hidden>Microphone (pick the phone’s own mic if headphones have one)<select id="micPick"></select></label>
       <p class="hint" id="rampInfo"></p>
       <p class="hint" id="pMic"></p>
@@ -943,7 +946,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.12.1';
+const APP_VERSION = '0.13.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1326,7 +1329,7 @@ const PATTERNS = [
   {id:'push', name:'D, DU, D, DU', slots:'D.DUD.DU'},
 ];
 const P = Object.assign({song:'gcd', bpm:70, per:4, mode:'wait', strum:'beat', forgive:true, click:true, hear:false, band:false, latency:0,
-  ramp:false, rampStep:4, rampMax:140, vibrate:false}, state.play || {});
+  ramp:false, rampStep:4, rampMax:140, vibrate:false, look:'lights'}, state.play || {});
 state.play = P;
 const T = {running:false, waiting:false, calibrating:false, counting:false, anchorTime:0, anchorBeat:0, barrier:0, nextClick:0,
   pending:0, evalIdx:0, results:new Map(), accs:new Map(), starts:new Map(), acc:null, okTicks:0,
@@ -1694,6 +1697,7 @@ function renderPlaySettings(){
   $('tForgive').setAttribute('aria-pressed', P.forgive);
   $('tHear').setAttribute('aria-pressed', P.hear);
   $('tBand').setAttribute('aria-pressed', P.band);
+  $('liveLook').value = P.look;
   $('tRamp').setAttribute('aria-pressed', P.ramp);
   $('tVibrate').setAttribute('aria-pressed', P.vibrate);
   $('tVibrate').hidden = !navigator.vibrate;
@@ -1946,6 +1950,7 @@ $('tForgive').onclick = () => {
     : 'Strict: every note of the chord has to ring clearly.';
 };
 $('tClick').onclick = () => { P.click = !P.click; renderPlaySettings(); };
+$('liveLook').onchange = e => { P.look = e.target.value; save(); };
 $('micPick').onchange = e => { state.micId = e.target.value; save(); if (mic) dropMic(); };
 $('tBand').onclick = () => {
   P.band = !P.band; renderPlaySettings();
@@ -2930,6 +2935,33 @@ $('bLiveExit').onclick = exitLive;
 $('bGoLive').onclick = goLive;
 $('bGoLive2').onclick = goLive;
 
+// Stage lighting over the camera picture: the room fades into darkness at the edges, with coloured beams that
+// sway, pulse on the beat and change colour with the venue. No background removal, so it's cheap to run.
+const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const LIGHTS = [['#FFE2B0', '#FFC77A'], ['#FFE2B0', '#FFB547'], ['#FFB547', '#FF8A3D'], ['#FFB547', '#FF4D6D'],
+  ['#FF4D8D', '#4DA3FF'], ['#FF4D8D', '#3EE6C4', '#FFE600', '#A99BFF'], ['#FFFFFF', '#FF4D8D', '#4DA3FF']];
+function stageLights(g, W, H){
+  const v = venueIndex(TOUR().fans), cols = LIGHTS[v], t = performance.now() / 1000;
+  const beat = T.running ? beatNow() : t * 1.2, pulse = T.running && beat >= 0 ? Math.max(0, 1 - (beat - Math.floor(beat)) * 2.5) : 0;
+  const vg = g.createRadialGradient(W / 2, H * 0.42, W * 0.24, W / 2, H * 0.45, W * 0.9);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.8)');
+  g.fillStyle = vg; g.fillRect(0, 0, W, H);
+  g.save(); g.globalCompositeOperation = 'lighter';
+  const n = v >= 4 ? 4 : 2;
+  for (let i = 0; i < n; i++){
+    const col = cols[(i + (v >= 5 ? Math.floor(Math.max(0, beat) / 4) : 0)) % cols.length];
+    const sx = W * (i + 0.5) / n, ex = W / 2 + Math.sin(t * (0.5 + i * 0.2) + i * 2) * W * 0.2 + (i - (n - 1) / 2) * W * 0.14;
+    const grad = g.createLinearGradient(sx, 0, ex, H);
+    grad.addColorStop(0, hexA(col, 0.3 + pulse * 0.18)); grad.addColorStop(0.85, hexA(col, 0));
+    g.fillStyle = grad;
+    g.beginPath(); g.moveTo(sx - 16, 0); g.lineTo(sx + 16, 0); g.lineTo(ex + W * 0.22, H); g.lineTo(ex - W * 0.22, H); g.closePath(); g.fill();
+  }
+  const hz = g.createRadialGradient(W / 2, 0, 10, W / 2, 0, W * 0.9);
+  hz.addColorStop(0, hexA(cols[0], 0.2 + pulse * 0.1)); hz.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = hz; g.fillRect(0, 0, W, H * 0.6);
+  g.restore();
+}
+
 // what the camera canvas shows (and records)
 function drawStage(){
   const cv = $('stageCv'), g = cv.getContext('2d'), W = cv.width, H = cv.height, v = LIVE.video;
@@ -2938,6 +2970,7 @@ function drawStage(){
     const sc = Math.max(W / v.videoWidth, H / v.videoHeight), w = v.videoWidth * sc, h = v.videoHeight * sc;
     g.save(); g.translate(W, 0); g.scale(-1, 1); g.drawImage(v, (W - w) / 2, (H - h) / 2, w, h); g.restore();   // mirrored, like a selfie
   }
+  if (P.look !== 'off') stageLights(g, W, H);
   // top banner: the venue and the song
   g.fillStyle = 'rgba(15,11,22,0.6)'; g.fillRect(0, 0, W, 122);
   g.textBaseline = 'alphabetic'; g.textAlign = 'left';
