@@ -221,6 +221,21 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.12.0: dropdowns in the app's style (the list that opens is drawn by the phone itself) */
+.app select{-webkit-appearance:none;appearance:none;font:inherit;font-size:1rem;color:var(--ink);border:1px solid var(--line);border-radius:12px;min-height:46px;padding:0 40px 0 14px;
+  background:var(--raise) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A89BBA' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center / 18px 18px;
+  text-overflow:ellipsis;white-space:nowrap;overflow:hidden;cursor:pointer}
+:root[data-theme="light"] .app select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235C5170' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+.app select:hover{border-color:var(--muted)}
+select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+select option,select optgroup{background:var(--surface);color:var(--ink)}
+.app .stagebar select.capo{border-radius:999px;min-height:34px;padding:0 30px 0 12px;font-size:.8rem;
+  background:var(--raise) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A89BBA' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center / 14px 14px}
+:root[data-theme="light"] .app .stagebar select.capo{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235C5170' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")}
+/* test mode */
+.devtag{font:700 .6rem var(--f-mono);letter-spacing:.1em;color:#0F0B16;background:var(--pulse);border-radius:6px;padding:2px 5px;margin-left:6px;vertical-align:middle}
+.devcard{border:2px dashed var(--pulse)}
+.devtoast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-weight:700;max-width:90vw;text-align:center}
 /* v0.11.0: live shows */
 .live .pstage{display:none}
 .livestage{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#000;align-self:center;width:min(100%,max(200px,calc((100svh - 300px) * 0.75)))}
@@ -380,7 +395,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
 
 <div class="app">
   <header class="top">
-    <div class="brand">BOBBY’S GUITAR <span class="ver" id="ver"></span></div>
+    <div class="brand">BOBBY’S GUITAR <span class="ver" id="ver"></span><!-- TEST-MODE-START --><span class="devtag" id="devTag" hidden>TEST</span><!-- TEST-MODE-END --></div>
     <button class="streak" id="streakChip" aria-label="Tour days in a row">
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--pulse)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5 1-8.5z"/></svg>
       <b id="streakN">0</b><span>tour days</span>
@@ -420,6 +435,20 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
       <label class="field">Your stage name (for the gig posters)<input id="stageName" type="text" maxlength="20" autocomplete="off"></label>
       <div class="row"><button class="pill" id="tKeepOn" aria-pressed="true">Keep screen on</button><button class="pill" id="tDaylight" aria-pressed="false">Daylight mode</button><button class="small" id="bIntro2">Show the intro again</button></div>
     </section>
+    <!-- TEST-MODE-START -->
+    <section class="card devcard" id="devCard" hidden>
+      <h2>Test mode</h2>
+      <p class="hint" id="devInfo"></p>
+      <label class="field">Jump to a venue<select id="devVenue"></select></label>
+      <div class="row"><button class="small" id="devFans150">+150 fans</button><button class="small" id="devFans500">+500 fans</button></div>
+      <div class="row"><button class="small" id="devPoster">Show level-up poster</button><button class="small" id="devSticker">Show a sticker pop-up</button></div>
+      <div class="row"><button class="small" id="devAllStickers">Unlock all stickers</button><button class="small" id="devNoStickers">Clear stickers</button></div>
+      <div class="row"><button class="small" id="devBackupDue">Make backup reminder due</button><button class="small" id="devHistory">Add 10 days of practice</button></div>
+      <div class="row"><button class="small" id="devConfetti">Fire the confetti</button><button class="small" id="devStrum">Test strum on Chords</button></div>
+      <div class="row"><button class="small" id="devReset">Reset progress</button><button class="small" id="devOff">Turn test mode off</button></div>
+      <p class="hint">Tap the version number 5 times to switch test mode on or off. Not included in 1.0 release builds.</p>
+    </section>
+    <!-- TEST-MODE-END -->
     <section class="card">
       <h2>Live shows</h2>
       <p class="hint" id="liveInfo"></p>
@@ -911,7 +940,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.11.0';
+const APP_VERSION = '0.12.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -2649,6 +2678,7 @@ function renderTour(){
   const nudge = hasProgress && (since == null || since >= 7) && !(state.backupSnooze && dayKey() < state.backupSnooze);
   $('backupNudge').hidden = !nudge;
   renderLive();
+  if (window.renderDev) renderDev();
   if (nudge) $('nudgeText').textContent = since == null ? 'Keep your progress safe: save a backup copy you can restore on any phone.' : `It’s been ${since} days since your last backup.`;
   $('backupInfo').textContent = (storageSafe ? 'Your progress is protected from the phone’s automatic clean-ups. ' : '') +
     'A backup copy keeps it safe if Chrome is cleared or you change phone. Last backup: ' +
@@ -2946,6 +2976,56 @@ function renderLive(){
   const timed = shows.filter(p => p.onTime != null);
   $('showTrend').textContent = timed.length >= 2 ? `First show: ${timed[0].onTime}% on time. Latest: ${timed[timed.length - 1].onTime}%.` : '';
 }
+
+// TEST-MODE-START  (everything down to TEST-MODE-END is stripped from 1.0+ builds by build.sh)
+/* ---------- test mode: tap the version number 5 times to switch on or off ---------- */
+let verTaps = [];
+$('ver').addEventListener('click', () => {
+  const now = Date.now();
+  verTaps = verTaps.filter(t => now - t < 2500); verTaps.push(now);
+  if (verTaps.length < 5) return;
+  verTaps = []; state.dev = !state.dev; save(); renderDev();
+  devToast(state.dev ? 'Test mode on: see the Test mode card in the Tour tab.' : 'Test mode off.');
+  if (state.dev) showView('tour');
+});
+function devToast(t){
+  let el = $('devToast');
+  if (!el){ el = document.createElement('div'); el.id = 'devToast'; el.className = 'devtoast'; el.setAttribute('role', 'status'); document.body.append(el); }
+  el.textContent = t; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => el.hidden = true, 2600);
+}
+function renderDev(){
+  $('devTag').hidden = !state.dev; $('devCard').hidden = !state.dev;
+  if (!state.dev) return;
+  const v = venueIndex(TOUR().fans);
+  $('devVenue').innerHTML = VENUES.map((x, i) => `<option value="${i}"${i === v ? ' selected' : ''}>${i + 1}. ${x.name} (${fmt(x.fans)} fans)</option>`).join('');
+  $('devInfo').textContent = `${fmt(TOUR().fans)} fans · ${Object.keys(TOUR().stickers).length}/${STICKERS.length} stickers · ${tourDays()} tour days · ${(state.shows || []).length} shows · storage ${storageSafe ? 'protected' : 'not protected'} · timing offset ${Math.round(P.latency * 1000)} ms`;
+}
+window.renderDev = renderDev;
+const devDo = (msg, f) => () => { f(); save(); renderTour(); renderStreak(); devToast(msg); };
+$('devFans150').onclick = devDo('+150 fans', () => addFans(150, false));
+$('devFans500').onclick = devDo('+500 fans', () => addFans(500, false));
+$('devVenue').onchange = e => { const i = +e.target.value; TOUR().fans = VENUES[i].fans; save(); renderTour(); renderStreak(); devToast(`Now at the ${VENUES[i].name}`); };
+$('devPoster').onclick = () => queueReward({kind: 'level', v: Math.max(1, venueIndex(TOUR().fans))});
+$('devSticker').onclick = () => queueReward({kind: 'sticker', id: STICKERS[Math.floor(Math.random() * STICKERS.length)].id});
+$('devAllStickers').onclick = devDo('All stickers unlocked', () => STICKERS.forEach(s => TOUR().stickers[s.id] = TOUR().stickers[s.id] || dayKey()));
+$('devNoStickers').onclick = devDo('Stickers cleared', () => { TOUR().stickers = {}; });
+$('devBackupDue').onclick = devDo('Backup reminder is now due', () => { const d = new Date(); d.setDate(d.getDate() - 9); state.lastBackup = dayKey(d); state.backupSnooze = null; TOUR().fans = Math.max(TOUR().fans, 60); });
+$('devHistory').onclick = devDo('Added 10 days of practice', () => {
+  const log = STORE('log');
+  for (let i = 1; i <= 10; i++){ const d = new Date(); d.setDate(d.getDate() - i); log[dayKey(d)] = Math.max(log[dayKey(d)] || 0, 300 + i * 60); }
+  const ch = STORE('changes'); ch['C→D'] = ch['C→D'] || {n: 5, sum: 9, best: 1.2}; ch['G→C'] = ch['G→C'] || {n: 6, sum: 7.2, best: 0.9};
+});
+$('devConfetti').onclick = () => { showView('chords'); setTimeout(() => celebrate($('chordName'), 70), 250); };
+$('devStrum').onclick = () => { showView('chords'); setTimeout(selfTest, 250); };
+let devResetArmed = false;
+$('devReset').onclick = () => {
+  if (!devResetArmed){ devResetArmed = true; $('devReset').textContent = 'Tap again to reset'; setTimeout(() => { devResetArmed = false; $('devReset').textContent = 'Reset progress'; }, 3000); return; }
+  ['tour', 'log', 'shows', 'changes', 'bests', 'quiz', 'lastBackup', 'backupSnooze'].forEach(k => delete state[k]);
+  save(); location.reload();
+};
+$('devOff').onclick = () => { state.dev = false; save(); renderDev(); devToast('Test mode off.'); };
+renderDev();
+// TEST-MODE-END
 
 /* ---------- wiring ---------- */
 $('bStrum').onclick = () => play('strum');

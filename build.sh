@@ -33,6 +33,17 @@ for f in files: json.load(open(os.path.join('songs', f)))   # fail the build on 
 json.dump({"songs": files}, open('songs/index.json', 'w'), indent=1)
 print(f"{len(files)} songs indexed")
 PY
+# Release builds (1.0 and later) leave out test mode: everything between the TEST-MODE-START and TEST-MODE-END markers.
+if [ "${VERSION%%.*}" -ge 1 ]; then
+  python3 - <<'PY'
+import re
+s = open('index.html').read()
+s = re.sub(r'<!-- TEST-MODE-START -->.*?<!-- TEST-MODE-END -->', '', s, flags=re.S)
+s = re.sub(r'// TEST-MODE-START.*?// TEST-MODE-END\n?', '', s, flags=re.S)
+open('index.html', 'w').write(s)
+print('test mode stripped (release build)')
+PY
+fi
 SAMPLES=$(for m in $(seq 40 69); do printf "'samples/%s.mp3'," "$m"; done)
 CROWD=$(for f in sounds/crowd/*.mp3; do printf "'%s'," "$f"; done)
 cat > sw.js <<SW

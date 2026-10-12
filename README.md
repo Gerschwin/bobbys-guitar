@@ -15,6 +15,8 @@ A beginner guitar chord trainer that runs in the browser and installs as an app 
 
 `app.html` is the single source file. `./build.sh` turns it into `index.html` and `sw.js` (the offline cache, named after `APP_VERSION`). Bump `APP_VERSION` in `app.html` with every change.
 
+**Test mode:** tap the version number 5 times. Everything for it sits between `TEST-MODE-START` / `TEST-MODE-END` markers, and `build.sh` strips it automatically once `APP_VERSION` reaches 1.0.
+
 To run it locally (the microphone needs `localhost` or HTTPS):
 
 ```bash
