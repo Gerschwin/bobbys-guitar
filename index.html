@@ -233,6 +233,12 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.9.0: backup and restore */
+#restoreLabel{position:relative}
+#restoreLabel input{position:absolute;width:1px;height:1px;opacity:0}
+.paste summary{cursor:pointer;color:var(--muted);font-size:.9rem}
+.paste[open]{display:flex;flex-direction:column;gap:8px}
+#bRestoreGo{border-color:var(--bad);color:var(--bad)}
 /* v0.8.13: Play along fits one screen: combo in the chord card, message inside the lane, sizes follow the screen height */
 @media (min-height:700px){ .pstage{grid-template-columns:minmax(0,52%) 1fr} }
 @media (max-height:680px){ .pinfo .eyebrow{display:none} .pinfo .hype{margin-top:6px} .pnext{margin-top:4px} .pstage{padding-block:8px} }
@@ -411,6 +417,17 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
       <h2>Settings</h2>
       <label class="field">Your stage name (for the gig posters)<input id="stageName" type="text" maxlength="20" autocomplete="off"></label>
       <div class="row"><button class="pill" id="tKeepOn" aria-pressed="true">Keep screen on</button><button class="pill" id="tDaylight" aria-pressed="false">Daylight mode</button><button class="small" id="bIntro2">Show the intro again</button></div>
+    </section>
+    <section class="card">
+      <h2>Backup</h2>
+      <p class="hint" id="backupInfo"></p>
+      <div class="row"><button class="btn primary" id="bBackup">Save a backup</button><label class="btn" id="restoreLabel">Restore<input type="file" id="restoreFile" accept=".txt,.json,text/plain,application/json"></label></div>
+      <details class="paste"><summary>Paste a backup instead</summary>
+        <textarea id="restoreText" class="shareout" rows="3" placeholder="Paste the backup text here"></textarea>
+        <button class="small" id="bRestoreText">Check this backup</button>
+      </details>
+      <p class="hint" id="backupMsg" aria-live="polite"></p>
+      <button class="btn" id="bRestoreGo" hidden>Yes, replace the progress on this phone</button>
     </section>
   </div>
 
@@ -867,7 +884,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.8.13';
+const APP_VERSION = '0.9.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -2525,6 +2542,9 @@ function renderTour(){
   $('stageName').value = t.name;
   $('tDaylight').setAttribute('aria-pressed', document.documentElement.dataset.theme === 'light');
   $('tKeepOn').setAttribute('aria-pressed', state.keepOn !== false);
+  $('backupInfo').textContent = (storageSafe ? 'Your progress is protected from the phone’s automatic clean-ups. ' : '') +
+    'A backup copy keeps it safe if Chrome is cleared or you change phone. Last backup: ' +
+    (state.lastBackup ? new Date(state.lastBackup + 'T12:00').toLocaleDateString(undefined, {day: 'numeric', month: 'long', year: 'numeric'}) : 'never') + '.';
 }
 function applyFinish(){
   const f = TOUR().finish;
@@ -2538,6 +2558,51 @@ $('tDaylight').onclick = () => {
   const light = document.documentElement.dataset.theme !== 'light';
   if (light) document.documentElement.dataset.theme = 'light'; else delete document.documentElement.dataset.theme;
   state.daylight = light; TOK = null; save(); renderTour();
+};
+/* ---------- storage: protected, plus backup and restore ---------- */
+let storageSafe = false;
+async function protectStorage(){
+  try { if (navigator.storage && navigator.storage.persist) storageSafe = (await navigator.storage.persisted()) || (await navigator.storage.persist()); } catch (e) {}
+  if (!$('viewTour').hidden) renderTour();
+}
+addEventListener('pointerdown', () => { if (!storageSafe) protectStorage(); }, {once: true, passive: true});
+const backupMsg = t => { $('backupMsg').textContent = t; };
+$('bBackup').onclick = async () => {
+  const name = `bobbys-guitar-backup-${dayKey()}.txt`;
+  const text = JSON.stringify({app: 'bobbys-guitar', format: 1, saved: new Date().toISOString(), appVersion: APP_VERSION, state});
+  const file = new File([text], name, {type: 'text/plain'});
+  const done = how => { state.lastBackup = dayKey(); save(); renderTour(); backupMsg(how); };
+  try {
+    if (navigator.canShare && navigator.canShare({files: [file]})){
+      await navigator.share({files: [file], title: 'Bobby’s Guitar backup'});
+      return done('Backup sent. Keep it somewhere safe, like a WhatsApp chat with yourself or Google Drive.');
+    }
+  } catch (e){ if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file); a.download = name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  done(`Backup saved to your Downloads folder as ${name}.`);
+};
+let pendingRestore = null;
+function offerRestore(text){
+  pendingRestore = null; $('bRestoreGo').hidden = true;
+  let o;
+  try { o = JSON.parse(String(text).trim()); } catch (e) { o = null; }
+  if (!o || o.app !== 'bobbys-guitar' || !o.state || typeof o.state !== 'object'){ backupMsg('That doesn’t look like a Bobby’s Guitar backup.'); return; }
+  const st = o.state, t = st.tour || {}, mine = (st.mySongs || []).length;
+  backupMsg(`Backup from ${new Date(o.saved).toLocaleDateString(undefined, {day: 'numeric', month: 'long', year: 'numeric'})}: ${fmt(t.fans || 0)} fans, ${Object.keys(t.stickers || {}).length} sticker${Object.keys(t.stickers || {}).length === 1 ? '' : 's'}` +
+    (mine ? `, ${mine} song${mine === 1 ? '' : 's'} of your own` : '') + '. Restoring replaces everything on this phone with it.');
+  pendingRestore = o; $('bRestoreGo').hidden = false;
+}
+$('restoreFile').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (f) offerRestore(await f.text()); };
+$('bRestoreText').onclick = () => offerRestore($('restoreText').value);
+$('bRestoreGo').onclick = () => {
+  if (!pendingRestore) return;
+  // swap the whole saved state in place, so anything that saves before the reload saves the backup
+  Object.keys(state).forEach(k => delete state[k]);
+  Object.assign(state, pendingRestore.state);
+  save();
+  location.reload();
 };
 $('tKeepOn').onclick = () => { state.keepOn = state.keepOn === false; save(); keepAwake(); renderTour(); };
 $('streakChip').onclick = () => showView('tour');
@@ -2635,5 +2700,6 @@ checkImport();
 if (!state.onboarded) showIntro();
 checkStreak(); renderStreak();
 keepAwake();
+protectStorage();
 </script>
 </body></html>
