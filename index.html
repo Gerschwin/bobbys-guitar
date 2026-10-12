@@ -959,7 +959,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.14.0';
+const APP_VERSION = '0.14.1';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -3038,11 +3038,26 @@ function personLayer(v, mask, W, H, w, h){
   return c;
 }
 function drawBlurred(g, v, W, H, w, h){
-  const s = SEG.small; s.width = 60; s.height = 80;      // shrink then stretch: a cheap, strong blur
-  const sx = s.getContext('2d'), k = 60 / W;
-  sx.save(); sx.translate(60, 0); sx.scale(-1, 1); sx.drawImage(v, (W - w) / 2 * k, (H - h) / 2 * k, w * k, h * k); sx.restore();
+  // a real blur on a quarter-size copy, then stretched back up: smooth, and still cheap
+  const s = SEG.small, sw = 180, sh = 240, k = sw / W, pad = 24;
+  if (s.width !== sw || s.height !== sh){ s.width = sw; s.height = sh; }
+  const sx = s.getContext('2d');
+  if (SEG.canFilter === undefined){ sx.filter = 'blur(2px)'; SEG.canFilter = sx.filter === 'blur(2px)'; sx.filter = 'none'; }
+  sx.save(); sx.translate(sw, 0); sx.scale(-1, 1);
+  if (SEG.canFilter){
+    sx.filter = 'blur(7px)';
+    sx.drawImage(v, (W - w) / 2 * k - pad, (H - h) / 2 * k - pad, w * k + pad * 2, h * k + pad * 2);   // drawn a bit oversize so the edges don't fade
+    sx.filter = 'none';
+  } else {
+    // no canvas filter: halve the picture a few times instead (still smooth when stretched back)
+    const t = SEG.tmp || (SEG.tmp = document.createElement('canvas')); t.width = 45; t.height = 60;
+    const tx = t.getContext('2d'); tx.imageSmoothingQuality = 'high';
+    tx.drawImage(v, 0, 0, 45, 60); sx.imageSmoothingQuality = 'high'; sx.drawImage(t, 0, 0, sw, sh);
+  }
+  sx.restore();
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
   g.drawImage(s, 0, 0, W, H);
+  g.fillStyle = 'rgba(15,11,22,0.25)'; g.fillRect(0, 0, W, H);   // a little darker, so you stand out
 }
 // a drawn backdrop for each venue (made once, then re-used)
 function backdrop(vi, W, H){
