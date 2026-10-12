@@ -579,7 +579,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
         <button class="small" id="bGoLive2">Go live: record a show</button>
       </div>
       <div class="row">
-        <label class="field grow">Live show look<select id="liveLook"><option value="lights">Stage lights</option><option value="off">Plain camera</option></select></label>
+        <label class="field grow">Live show look<select id="liveLook"><option value="lights">Stage lights</option><option value="backdrop">Stage backdrop behind you</option><option value="blur">Blur the background</option><option value="off">Plain camera</option></select></label>
       </div>
       <label class="field" id="micField" hidden>Microphone (pick the phone’s own mic if headphones have one)<select id="micPick"></select></label>
       <p class="hint" id="rampInfo"></p>
@@ -959,7 +959,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.13.0';
+const APP_VERSION = '0.14.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1963,7 +1963,6 @@ $('tForgive').onclick = () => {
     : 'Strict: every note of the chord has to ring clearly.';
 };
 $('tClick').onclick = () => { P.click = !P.click; renderPlaySettings(); };
-$('liveLook').onchange = e => { P.look = e.target.value; save(); };
 $('micPick').onchange = e => { state.micId = e.target.value; save(); if (mic) dropMic(); };
 $('tBand').onclick = () => {
   P.band = !P.band; renderPlaySettings();
@@ -2867,6 +2866,7 @@ async function goLive(){
   $('bGo').textContent = 'Start the show';
   $('pMic').textContent = 'Live show: the camera is on. Press “Start the show” to start recording. The band, crowd and your guitar all go in the video.';
   loadCrowd();
+  if (needsSeg()) loadSeg();
   keepAwake(); window.scrollTo(0, 0);
 }
 function exitLive(){
@@ -2975,15 +2975,167 @@ function stageLights(g, W, H){
   g.restore();
 }
 
+/* ---------- Live show backgrounds: blur, or a stage backdrop behind you ---------- */
+// MediaPipe's selfie segmenter (Apache 2.0, bundled in vendor/mediapipe) finds the person in each camera frame,
+// all on the phone. It's only downloaded the first time Blur or Stage backdrop is picked (about 13 MB).
+const SEG = {seg: null, ready: false, loading: null, last: 0, every: 0, avg: 0, fail: 0, img: null,
+  maskCv: document.createElement('canvas'), inCv: document.createElement('canvas'), person: document.createElement('canvas'), small: document.createElement('canvas'), backdrops: {}};
+const needsSeg = () => P.look === 'blur' || P.look === 'backdrop';
+async function loadSeg(){
+  if (SEG.ready) return true;
+  if (!SEG.loading){
+    SEG.loading = (async () => {
+      const mp = await import('./vendor/mediapipe/vision_bundle.mjs');
+      const url = f => new URL('vendor/mediapipe/' + f, location.href).href;
+      const files = {wasmLoaderPath: url('wasm/vision_wasm_internal.js'), wasmBinaryPath: url('wasm/vision_wasm_internal.wasm')};
+      const opts = d => ({baseOptions: {modelAssetPath: url('selfie_segmenter.tflite'), delegate: d}, runningMode: 'VIDEO', outputCategoryMask: false, outputConfidenceMasks: true});
+      try { SEG.seg = await mp.ImageSegmenter.createFromOptions(files, opts('GPU')); }
+      catch (e){ SEG.seg = await mp.ImageSegmenter.createFromOptions(files, opts('CPU')); }
+      SEG.ready = true;
+    })();
+  }
+  try { await SEG.loading; return true; } catch (e){ SEG.loading = null; return false; }
+}
+// the latest "where's the person" mask; slower phones re-use it for a frame or two
+function segMask(v){
+  const now = performance.now();
+  if (now - SEG.last >= SEG.every){
+    SEG.last = now;
+    const t0 = performance.now();
+    try {
+      // the model works at about 256 px, so hand it a small copy of the frame (much less work, and a small mask)
+      const ic = SEG.inCv, iw = 192, ih = Math.round(192 * v.videoHeight / v.videoWidth);
+      if (ic.width !== iw || ic.height !== ih){ ic.width = iw; ic.height = ih; }
+      ic.getContext('2d').drawImage(v, 0, 0, iw, ih);
+      SEG.seg.segmentForVideo(ic, now, res => {
+        const m = res.confidenceMasks && res.confidenceMasks[0];
+        if (m) writeMask(m.getAsFloat32Array(), m.width, m.height);
+      });
+      SEG.fail = 0;
+    } catch (e){ if (++SEG.fail > 5){ SEG.ready = false; P.look = 'lights'; $('liveLook').value = 'lights'; $('pMic').textContent = 'The background effect stopped working on this phone, so it’s back to stage lights.'; } }
+    const dt = performance.now() - t0;
+    SEG.avg = SEG.avg * 0.9 + dt * 0.1;
+    SEG.every = SEG.avg > 45 ? 100 : SEG.avg > 25 ? 60 : 0;
+  }
+  return SEG.maskCv.width ? SEG.maskCv : null;
+}
+function writeMask(d, mw, mh){
+  const c = SEG.maskCv, cx = c.getContext('2d');
+  if (c.width !== mw || c.height !== mh){ c.width = mw; c.height = mh; SEG.img = cx.createImageData(mw, mh); }
+  const px = SEG.img.data;
+  for (let i = 0; i < d.length; i++) px[i * 4 + 3] = Math.max(0, Math.min(1, (d[i] - 0.3) / 0.4)) * 255;   // soft edge
+  cx.putImageData(SEG.img, 0, 0);
+}
+function personLayer(v, mask, W, H, w, h){
+  const c = SEG.person;
+  if (c.width !== W || c.height !== H){ c.width = W; c.height = H; }
+  const p = c.getContext('2d');
+  p.globalCompositeOperation = 'source-over'; p.clearRect(0, 0, W, H);
+  p.save(); p.translate(W, 0); p.scale(-1, 1);
+  p.drawImage(v, (W - w) / 2, (H - h) / 2, w, h);
+  p.globalCompositeOperation = 'destination-in'; p.drawImage(mask, (W - w) / 2, (H - h) / 2, w, h);
+  p.restore(); p.globalCompositeOperation = 'source-over';
+  return c;
+}
+function drawBlurred(g, v, W, H, w, h){
+  const s = SEG.small; s.width = 60; s.height = 80;      // shrink then stretch: a cheap, strong blur
+  const sx = s.getContext('2d'), k = 60 / W;
+  sx.save(); sx.translate(60, 0); sx.scale(-1, 1); sx.drawImage(v, (W - w) / 2 * k, (H - h) / 2 * k, w * k, h * k); sx.restore();
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+  g.drawImage(s, 0, 0, W, H);
+}
+// a drawn backdrop for each venue (made once, then re-used)
+function backdrop(vi, W, H){
+  if (SEG.backdrops[vi]) return SEG.backdrops[vi];
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d'), rnd = (() => { let s = 7 + vi * 101; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+  const fill = (col, x, y, w, h) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  const bulbs = (y, cols, n = 14, sag = 40) => {
+    g.strokeStyle = 'rgba(0,0,0,0.6)'; g.lineWidth = 3; g.beginPath();
+    for (let i = 0; i <= n; i++){ const x = i / n * W, yy = y + Math.sin(i / n * Math.PI) * sag; i ? g.lineTo(x, yy) : g.moveTo(x, yy); }
+    g.stroke();
+    for (let i = 0; i <= n; i++){
+      const x = i / n * W, yy = y + Math.sin(i / n * Math.PI) * sag + 12, col = cols[i % cols.length];
+      const gl = g.createRadialGradient(x, yy, 1, x, yy, 30); gl.addColorStop(0, col); gl.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = gl; g.fillRect(x - 30, yy - 30, 60, 60); g.fillStyle = '#FFF6E0'; g.beginPath(); g.arc(x, yy, 5, 0, Math.PI * 2); g.fill();
+    }
+  };
+  const bricks = (base, mortar) => {
+    fill(mortar, 0, 0, W, H);
+    for (let y = 0, r = 0; y < H; y += 44, r++) for (let x = (r % 2) * -50; x < W; x += 100){
+      const l = 0.85 + rnd() * 0.3; g.fillStyle = base; g.globalAlpha = l; g.fillRect(x + 3, y + 3, 94, 38); g.globalAlpha = 1;
+    }
+  };
+  const crowd = (y, col) => {
+    g.fillStyle = col;
+    for (let x = -20; x < W + 20; x += 34 + rnd() * 12){
+      const hh = 70 + rnd() * 50; g.beginPath(); g.arc(x, y - hh + 22, 20, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.ellipse(x, y, 34, hh - 20, 0, Math.PI, 0); g.fill();
+      if (rnd() < 0.3){ g.fillRect(x + 14, y - hh - 50, 8, 70); }   // a raised arm
+    }
+    g.fillRect(0, y, W, H - y);
+  };
+  if (vi === 0){            // bedroom: painted wall, posters, fairy lights
+    fill('#3B2A44', 0, 0, W, H);
+    [['#FF4D8D', 60, 210, 170, 230], ['#3EE6C4', 470, 180, 190, 260], ['#FFB547', 280, 120, 150, 200]].forEach(([c, x, y, w, h]) => { fill(c, x, y, w, h); fill('rgba(15,11,22,0.55)', x + 14, y + 14, w - 28, h - 28); });
+    bulbs(70, ['#FFE2B0'], 12, 50);
+  } else if (vi === 1){     // garage: roller door
+    fill('#2B3240', 0, 0, W, H);
+    for (let y = 0; y < H; y += 36){ fill('#353D4D', 0, y, W, 30); fill('#1C212B', 0, y + 30, W, 6); }
+    fill('#FFC77A', W / 2 - 60, 30, 120, 14);
+  } else if (vi === 2){     // open mic: brick wall and a neon sign
+    bricks('#6B2E26', '#2A1512');
+    g.save(); g.shadowColor = '#FF4D8D'; g.shadowBlur = 30; g.fillStyle = '#FFB3CF'; g.font = '400 92px Anton, "Arial Narrow", sans-serif'; g.textAlign = 'center';
+    g.fillText('OPEN MIC', W / 2, 230); g.restore();
+  } else if (vi === 3){     // pub: wood panelling and warm bulbs
+    fill('#3A2416', 0, 0, W, H);
+    for (let x = 0; x < W; x += 80){ fill('#4A2F1C', x, 0, 70, H); fill('#2A190F', x + 70, 0, 10, H); }
+    fill('#24150C', 0, H * 0.62, W, 16);
+    bulbs(60, ['#FFC77A', '#FFB547'], 10, 60);
+  } else if (vi === 4){     // club: black with neon tubes
+    fill('#0B0812', 0, 0, W, H);
+    g.save(); g.lineWidth = 10; g.lineCap = 'round';
+    [['#FF4D8D', -100, 160, 820, 520], ['#4DA3FF', -60, 560, 820, 140], ['#3EE6C4', 120, -40, 600, 940]].forEach(([col, x1, y1, x2, y2]) => {
+      g.shadowColor = col; g.shadowBlur = 40; g.strokeStyle = col; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); });
+    g.restore();
+  } else if (vi === 5){     // festival: night sky, stage truss lights, crowd
+    const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#0B1030'); sky.addColorStop(0.7, '#3A1D5C'); sky.addColorStop(1, '#7A2F6B');
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 90; i++){ g.fillStyle = `rgba(255,255,255,${0.3 + rnd() * 0.6})`; g.fillRect(rnd() * W, rnd() * H * 0.5, 2, 2); }
+    fill('#15121F', 0, 40, W, 22);
+    for (let x = 30; x < W; x += 70){ const gl = g.createRadialGradient(x, 72, 2, x, 72, 40); gl.addColorStop(0, ['#FFE600', '#FF4D8D', '#3EE6C4'][Math.round(x / 70) % 3]); gl.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gl; g.fillRect(x - 40, 32, 80, 80); }
+    crowd(H * 0.86, '#0A0712');
+  } else {                  // stadium: tiers of phone lights, big screens
+    const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#05070F'); sky.addColorStop(1, '#141A33');
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    fill('#1E2747', 40, 90, 200, 120); fill('#1E2747', W - 240, 90, 200, 120);
+    for (let i = 0; i < 700; i++){ const y = 260 + Math.pow(rnd(), 0.7) * (H - 300); g.fillStyle = `rgba(255,250,220,${0.25 + rnd() * 0.7})`; g.fillRect(rnd() * W, y, 2 + rnd() * 2, 2 + rnd() * 2); }
+    crowd(H * 0.9, '#05060C');
+  }
+  return SEG.backdrops[vi] = c;
+}
+$('liveLook').onchange = async e => {
+  P.look = e.target.value; save();
+  if (!needsSeg()) return;
+  $('pMic').textContent = SEG.ready ? '' : 'Getting the background effect ready (about 13 MB the first time, then it works offline)…';
+  const ok = await loadSeg();
+  if (!ok){ P.look = 'lights'; $('liveLook').value = 'lights'; save(); $('pMic').textContent = 'Couldn’t load the background effect (are you offline?), so it’s using stage lights.'; return; }
+  $('pMic').textContent = P.look === 'blur' ? 'Background blur is ready for your next live show.' : 'Stage backdrop is ready: it changes with each venue you reach.';
+};
+
 // what the camera canvas shows (and records)
 function drawStage(){
   const cv = $('stageCv'), g = cv.getContext('2d'), W = cv.width, H = cv.height, v = LIVE.video;
   g.fillStyle = '#0F0B16'; g.fillRect(0, 0, W, H);
   if (v && v.videoWidth){
     const sc = Math.max(W / v.videoWidth, H / v.videoHeight), w = v.videoWidth * sc, h = v.videoHeight * sc;
-    g.save(); g.translate(W, 0); g.scale(-1, 1); g.drawImage(v, (W - w) / 2, (H - h) / 2, w, h); g.restore();   // mirrored, like a selfie
+    const mask = needsSeg() && SEG.ready ? segMask(v) : null;
+    if (mask){
+      if (P.look === 'blur') drawBlurred(g, v, W, H, w, h); else g.drawImage(backdrop(venueIndex(TOUR().fans), W, H), 0, 0);
+      g.drawImage(personLayer(v, mask, W, H, w, h), 0, 0);
+    } else { g.save(); g.translate(W, 0); g.scale(-1, 1); g.drawImage(v, (W - w) / 2, (H - h) / 2, w, h); g.restore(); }   // mirrored, like a selfie
   }
-  if (P.look !== 'off') stageLights(g, W, H);
+  if (P.look === 'lights' || P.look === 'backdrop') stageLights(g, W, H);
   // top banner: the venue and the song
   g.fillStyle = 'rgba(15,11,22,0.6)'; g.fillRect(0, 0, W, 122);
   g.textBaseline = 'alphabetic'; g.textAlign = 'left';

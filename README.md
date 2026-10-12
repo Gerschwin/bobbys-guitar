@@ -25,6 +25,8 @@ To run it locally (the microphone needs `localhost` or HTTPS):
 
 ## Credits
 
+Background blur and backdrops (live shows): Google [MediaPipe](https://github.com/google-ai-edge/mediapipe) tasks-vision 1.1.0 and the selfie segmenter model, Apache 2.0 (see `vendor/mediapipe/LICENSE`).
+
 Crowd sounds (live shows): applause and cheering from [BigSoundBank](https://bigsoundbank.com), CC0 (public domain).
 
 Guitar samples: steel-string acoustic guitar from the FluidR3 GM soundfont by Frank Wen, licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), via [gleitz/midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts).
