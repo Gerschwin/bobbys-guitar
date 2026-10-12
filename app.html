@@ -221,6 +221,16 @@ button:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .introcard h2{font-family:var(--f-display);font-weight:800;font-size:1.6rem;margin:0;letter-spacing:-.02em}
 .introcard p{margin:0;color:var(--muted)}
 .nav,.seg button{-webkit-user-select:none;user-select:none}
+/* v0.11.0: live shows */
+.live .pstage{display:none}
+.livestage{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#000;align-self:center;width:min(100%,max(200px,calc((100svh - 300px) * 0.75)))}
+#stageCv{display:block;width:100%;height:auto}
+.liveexit{position:absolute;top:6px;right:6px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:1.1rem}
+/* in a live show the lane is drawn inside the camera picture, so the normal one is kept off screen (it still has to be drawn) */
+.live .lanewrap{position:fixed;left:-3000px;top:0;width:min(488px,calc(100vw - 32px))}
+#showVideo{width:100%;max-height:52svh;border-radius:12px;background:#000}
+.shows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.shows li span{display:block;font-size:.8rem;color:var(--muted)}
 /* v0.9.0: backup and restore */
 .nudge{background:var(--accent-soft);border:1px solid var(--accent);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-weight:600}
 #restoreLabel{position:relative}
@@ -411,6 +421,13 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
       <div class="row"><button class="pill" id="tKeepOn" aria-pressed="true">Keep screen on</button><button class="pill" id="tDaylight" aria-pressed="false">Daylight mode</button><button class="small" id="bIntro2">Show the intro again</button></div>
     </section>
     <section class="card">
+      <h2>Live shows</h2>
+      <p class="hint" id="liveInfo"></p>
+      <button class="btn primary" id="bGoLive">Go live</button>
+      <p class="hint" id="showTrend"></p>
+      <ul class="shows" id="showList"></ul>
+    </section>
+    <section class="card">
       <h2>Backup</h2>
       <p class="hint" id="backupInfo"></p>
       <div class="row"><button class="btn primary" id="bBackup">Save a backup</button><label class="btn" id="restoreLabel">Restore<input type="file" id="restoreFile" accept=".txt,.json,text/plain,application/json"></label></div>
@@ -469,6 +486,10 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
   </div>
 
   <div class="view" id="viewPlay" hidden>
+    <section class="livestage" id="liveStage" hidden>
+      <canvas id="stageCv" width="720" height="960" aria-label="Live show: camera picture with the stage overlay"></canvas>
+      <button class="liveexit" id="bLiveExit" aria-label="Exit live show">✕</button>
+    </section>
     <section class="pstage">
       <svg id="pbox" class="cbox" viewBox="14 18 236 308" role="img" aria-labelledby="pName"></svg>
       <div class="pinfo">
@@ -510,6 +531,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
         <button class="pill" id="tRamp" aria-pressed="false">Speed up each time</button>
         <button class="pill" id="tVibrate" aria-pressed="false">Vibrate on beat</button>
         <button class="small" id="bCal">Calibrate timing</button>
+        <button class="small" id="bGoLive2">Go live: record a show</button>
       </div>
       <label class="field" id="micField" hidden>Microphone (pick the phone’s own mic if headphones have one)<select id="micPick"></select></label>
       <p class="hint" id="rampInfo"></p>
@@ -597,6 +619,17 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
   <button id="tabPractice" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Practice</button>
   <button id="tabTour" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10l8-6 8 6v10M9 20v-6h6v6"/></svg>Tour</button>
 </nav>
+
+<div class="reward" id="showDone" hidden role="dialog" aria-modal="true" aria-labelledby="showTitle">
+  <div class="rewardcard">
+    <div class="rtag">SHOW #<span id="showNo"></span></div>
+    <h2 id="showTitle"></h2>
+    <video id="showVideo" controls playsinline></video>
+    <div class="score" id="showStats"></div>
+    <p class="hint" id="showMsg"></p>
+    <div class="row"><button class="btn primary" id="bShowSave">Save video</button><button class="btn" id="bShowBin">Close</button></div>
+  </div>
+</div>
 
 <div class="reward" id="reward" hidden role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
   <div class="rewardcard">
@@ -878,7 +911,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.10.0';
+const APP_VERSION = '0.11.0';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -1333,7 +1366,7 @@ function clickAt(t, kind){
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(peak, t + 0.002);
   g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
-  o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.06);
+  o.connect(g); g.connect(LIVE.on ? ctx.destination : out); o.start(t); o.stop(t + 0.06);   // the click never goes in a live recording
 }
 // Look-ahead scheduler: books clicks (and optional backing strums) a little ahead on the audio clock.
 // In "wait" mode it never books past the next chord you haven't played yet.
@@ -1571,7 +1604,8 @@ async function startPlay(){
     stats:{total:0, right:0, onTime:0, streak:0, best:0, cleared:0, beats:0, beatsOn:0}});
   T.passSnap = {...T.stats}; renderHype();
   T.sched = setInterval(scheduler, 25); scheduler();
-  $('bGo').disabled = false; $('bGo').textContent = 'Stop';
+  $('bGo').disabled = false; $('bGo').textContent = LIVE.on ? 'End the show' : 'Stop';
+  if (LIVE.on) startRecording();
   lockSettings(true);
   setFeed('');
   $('pMic').textContent = T.hasMic ? '' : P.mode === 'wait'
@@ -1586,8 +1620,9 @@ function stopPlay(){
   clearInterval(T.sched);
   if (voice) voice.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
   if (P.ramp){ T.reached = P.bpm; P.bpm = T.startBpm; $('bpm').value = P.bpm; $('bpmVal').textContent = P.bpm; }
-  $('bGo').textContent = 'Start';
+  $('bGo').textContent = LIVE.on ? 'Start the show' : 'Start';
   lockSettings(false);
+  if (LIVE.on && LIVE.rec) finishShow();
   showMsg(summary());
   if (P.ramp && T.reached - T.startBpm >= 20) earn('speed');
   T.shown = -1;
@@ -1831,6 +1866,7 @@ function frame(){
   updateNowChord();
   drawLane();
   drawMeter();
+  if (LIVE.on) drawStage();
 }
 const VIEWS = ['chords', 'play', 'edit', 'practice'];
 function showView(v){
@@ -1841,7 +1877,7 @@ function showView(v){
   $('tabPlay').setAttribute('aria-selected', v === 'play' || v === 'edit');
   $('tabPractice').setAttribute('aria-selected', v === 'practice');
   $('tabTour').setAttribute('aria-selected', v === 'tour');
-  if (v !== 'play') stopPlay();
+  if (v !== 'play'){ exitLive(); stopPlay(); }
   if (v !== 'practice') stopPractice();
   if (v !== 'chords' && listening) stopMic();
   if (isPlay){
@@ -2366,6 +2402,7 @@ const STICKERS = [
   ['ten-hours', '10 HRS', 'Ten-hour club', 'Practised for ten hours in total.'],
   ['night-owl', 'LATE', 'Night owl', 'Practised after 10 pm.'],
   ['early-bird', 'EARLY', 'Early bird', 'Practised before 8 am.'],
+  ['first-show', 'LIVE!', 'First live show', 'Recorded your first live show.'],
 ].map(([id, big, name, desc], i) => ({id, big, name, desc, shape: ['circle', 'star', 'tag', 'pass', 'burst'][i % 5], color: ['#FFB547', '#FF4D8D', '#3EE6C4', '#A99BFF', '#F5F0FA'][(i * 2) % 5]}));
 const TOUR = () => {
   const t = state.tour = state.tour || {};
@@ -2427,6 +2464,7 @@ function onStrum(hit){
     const dl = setlist(); dl.strums = (dl.strums || 0) + 1;
     if (dl.strums >= 50) completeDaily('strums');
   } else T.combo = 0;
+  liveCheer();
   renderHype();
 }
 function renderHype(){
@@ -2447,6 +2485,7 @@ function songFinished(){
   const s = T.stats, a = T.passSnap || {}, d = k => (s[k] || 0) - (a[k] || 0), t = TOUR(), id = song().id;
   T.passSnap = {...s};
   addFans(20); earn('first-song');
+  crowd('bar1', 0.55, 3);
   if (id === setlist().song) completeDaily('song');
   if (P.mode === 'keep' && T.hasMic && d('total') > 0){
     const score = (d('right') / d('total') + (d('beats') ? d('beatsOn') / d('beats') : 1)) / 2;
@@ -2532,7 +2571,7 @@ function goDaily(id){
 // rewards: level-up posters and new stickers, shown when nothing is being played
 const REWARDS = [];
 function queueReward(r){ REWARDS.push(r); maybeShowReward(); }
-const busy = () => T.running || TR.running || listening || TUNER.on || !$('intro').hidden;
+const busy = () => T.running || TR.running || listening || TUNER.on || !$('intro').hidden || LIVE.tail || !$('showDone').hidden;
 function maybeShowReward(){
   if (!$('reward').hidden || busy() || !REWARDS.length) return;
   const wait = 1900 - (performance.now() - (FX.at || -1e9));
@@ -2609,6 +2648,7 @@ function renderTour(){
   const since = state.lastBackup ? Math.round((Date.parse(dayKey()) - Date.parse(state.lastBackup)) / 864e5) : null;
   const nudge = hasProgress && (since == null || since >= 7) && !(state.backupSnooze && dayKey() < state.backupSnooze);
   $('backupNudge').hidden = !nudge;
+  renderLive();
   if (nudge) $('nudgeText').textContent = since == null ? 'Keep your progress safe: save a backup copy you can restore on any phone.' : `It’s been ${since} days since your last backup.`;
   $('backupInfo').textContent = (storageSafe ? 'Your progress is protected from the phone’s automatic clean-ups. ' : '') +
     'A backup copy keeps it safe if Chrome is cleared or you change phone. Last backup: ' +
@@ -2725,6 +2765,186 @@ function fxStep(){
     g.fillStyle = p.c; g.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); g.restore();
   }
   FX.raf = FX.parts.length ? requestAnimationFrame(fxStep) : 0;
+}
+
+/* ---------- Live Show: film yourself playing, with the band and a crowd ---------- */
+// The camera picture, a stage overlay and the play-along lane are drawn onto one canvas, which is recorded
+// together with the guitar (mic) and the app's own sound (band, rhythm guitar, crowd). Videos stay on the phone.
+const LIVE = {on: false, cam: null, video: null, rec: null, chunks: [], dest: null, micSrc: null, delay: null, crowd: {}, t0: 0, best: 0,
+  blob: null, url: null, mime: '', tail: false, pending: null, prevMode: null};
+const liveUnlocked = () => venueIndex(TOUR().fans) >= 2;
+const CROWD_FILES = {bar1: '2479', bar3: '2481', yeah1: '0236', yeah2: '0237', big300: '0020', big600: '0021'};   // CC0, bigsoundbank.com
+async function loadCrowd(){
+  for (const [k, f] of Object.entries(CROWD_FILES)){
+    if (LIVE.crowd[k]) continue;
+    try {
+      const ab = await (await fetch(`sounds/crowd/${f}.mp3`)).arrayBuffer();
+      LIVE.crowd[k] = await new Promise((res, rej) => ctx.decodeAudioData(ab, res, rej));
+    } catch (e) {}
+  }
+}
+function crowd(k, gain = 0.8, fadeAfter = 0){
+  const b = LIVE.crowd[k];
+  if (!b || !LIVE.on) return;
+  const s = ctx.createBufferSource(), g = ctx.createGain(), t = ctx.currentTime;
+  s.buffer = b; g.gain.value = gain; s.connect(g); g.connect(out); s.start(t);
+  if (fadeAfter){ g.gain.setValueAtTime(gain, t + fadeAfter); g.gain.linearRampToValueAtTime(0, t + fadeAfter + 1.5); s.stop(t + fadeAfter + 1.6); }
+}
+function liveCheer(){
+  if (!LIVE.on || !T.running) return;
+  LIVE.best = Math.max(LIVE.best, T.combo || 0);
+  if (T.combo === 10 || T.combo === 25 || (T.combo > 0 && T.combo % 50 === 0)) crowd(T.combo % 20 === 10 ? 'yeah1' : 'yeah2', 0.75);
+}
+
+async function goLive(){
+  if (!liveUnlocked()){
+    $('pMic').textContent = `Live shows unlock at the Open Mic: ${fmt(VENUES[2].fans - TOUR().fans)} more fans to go.`;
+    return;
+  }
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){ $('pMic').textContent = 'This phone’s browser can’t record video, so live shows aren’t available on it.'; return; }
+  showView('play');
+  audio();
+  try { LIVE.cam = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'user', width: {ideal: 720}, height: {ideal: 960}}, audio: false}); }
+  catch (e){ $('pMic').textContent = 'The camera isn’t available, so a live show can’t be recorded. Allow the camera for Bobby’s Guitar in the phone’s settings.'; return; }
+  LIVE.video = document.createElement('video');
+  LIVE.video.muted = true; LIVE.video.playsInline = true; LIVE.video.srcObject = LIVE.cam;
+  try { await LIVE.video.play(); } catch (e) {}
+  LIVE.on = true;
+  $('viewPlay').classList.add('live'); $('liveStage').hidden = false;
+  LIVE.prevMode = P.mode; P.mode = 'keep';            // a show doesn't stop and wait
+  renderPlaySettings();
+  $('bGo').textContent = 'Start the show';
+  $('pMic').textContent = 'Live show: the camera is on. Press “Start the show” to start recording. The band, crowd and your guitar all go in the video.';
+  loadCrowd();
+  keepAwake(); window.scrollTo(0, 0);
+}
+function exitLive(){
+  if (!LIVE.on) return;
+  if (T.running) stopPlay();
+  LIVE.on = false; LIVE.tail = false;
+  $('viewPlay').classList.remove('live'); $('liveStage').hidden = true;
+  if (LIVE.cam){ LIVE.cam.getTracks().forEach(t => t.stop()); LIVE.cam = null; }
+  if (LIVE.prevMode){ P.mode = LIVE.prevMode; LIVE.prevMode = null; }
+  renderPlaySettings();
+  $('bGo').textContent = 'Start'; $('pMic').textContent = '';
+}
+function startRecording(){
+  const dest = LIVE.dest = ctx.createMediaStreamDestination();
+  // the guitar reaches the mic a little late, so hold the app's own sound back by the same amount to keep them together
+  LIVE.delay = ctx.createDelay(1); LIVE.delay.delayTime.value = Math.max(0, Math.min(0.9, P.latency));
+  out.connect(LIVE.delay); LIVE.delay.connect(dest);
+  if (mic){ LIVE.micSrc = ctx.createMediaStreamSource(mic.stream); const g = ctx.createGain(); g.gain.value = 1.4; LIVE.micSrc.connect(g); g.connect(dest); }
+  const stream = new MediaStream([...$('stageCv').captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+  LIVE.mime = ['video/mp4;codecs=avc1,mp4a', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '';
+  LIVE.chunks = []; LIVE.best = 0; LIVE.t0 = performance.now();
+  LIVE.rec = new MediaRecorder(stream, LIVE.mime ? {mimeType: LIVE.mime, videoBitsPerSecond: 2500000} : {});
+  LIVE.rec.ondataavailable = e => { if (e.data && e.data.size) LIVE.chunks.push(e.data); };
+  LIVE.rec.start(1000);
+  setTimeout(() => crowd('bar3', 0.7), 300);          // the crowd welcomes you on
+}
+function finishShow(){
+  LIVE.tail = true;                                   // first, so any sticker waits until the show is wrapped up
+  const v = venueIndex(TOUR().fans), s = T.stats || {}, shows = state.shows = state.shows || [];
+  LIVE.pending = {n: shows.length + 1, date: dayKey(), song: song().name, venue: VENUES[v].name,
+    onTime: s.beats ? Math.round(s.beatsOn / s.beats * 100) : null, right: s.total ? Math.round(s.right / s.total * 100) : null,
+    combo: LIVE.best, secs: Math.round((performance.now() - LIVE.t0) / 1000)};
+  shows.push(LIVE.pending); if (shows.length > 100) shows.shift();
+  addFans(25, false); earn('first-show'); save();
+  crowd(v >= 6 ? 'big600' : v >= 4 ? 'big300' : 'bar1', 0.9, 4);   // applause sized to the venue
+  const rec = LIVE.rec; LIVE.rec = null; LIVE.tail = true;
+  $('bGo').disabled = true;
+  setTimeout(() => {                                  // keep filming the applause for a few seconds
+    rec.onstop = () => showResult(rec.mimeType || LIVE.mime);
+    rec.stop();
+    try { out.disconnect(LIVE.delay); } catch (e) {}
+    if (LIVE.micSrc) try { LIVE.micSrc.disconnect(); } catch (e) {}
+    $('bGo').disabled = false;
+  }, 4500);
+}
+function showResult(mime){
+  LIVE.tail = false;
+  const blob = new Blob(LIVE.chunks, {type: (mime || 'video/webm').split(';')[0]});
+  if (LIVE.url) URL.revokeObjectURL(LIVE.url);
+  LIVE.blob = blob; LIVE.url = URL.createObjectURL(blob);
+  const p = LIVE.pending;
+  $('showNo').textContent = p.n;
+  $('showTitle').textContent = `${p.song} at the ${p.venue}`;
+  $('showVideo').src = LIVE.url;
+  $('showStats').innerHTML = (p.onTime != null ? `<span>On time <b>${p.onTime}%</b></span>` : '') + (p.right != null ? `<span>Right chords <b>${p.right}%</b></span>` : '') + `<span>Best combo <b>×${p.combo}</b></span>`;
+  $('showMsg').textContent = `${(blob.size / 1048576).toFixed(1)} MB. The video isn’t kept in the app, so save it if you want it.`;
+  $('showDone').hidden = false;
+}
+function closeShow(){
+  $('showDone').hidden = true; $('showVideo').pause(); $('showVideo').removeAttribute('src');
+  if (LIVE.url){ URL.revokeObjectURL(LIVE.url); LIVE.url = null; }
+  LIVE.blob = null;
+  if (!$('viewTour').hidden) renderTour();
+  maybeShowReward();
+}
+$('bShowSave').onclick = async () => {
+  if (!LIVE.blob) return;
+  const ext = LIVE.blob.type.includes('mp4') ? 'mp4' : 'webm', name = `bobbys-guitar-show-${LIVE.pending.n}.${ext}`;
+  const file = new File([LIVE.blob], name, {type: LIVE.blob.type});
+  const saved = msg => { LIVE.pending.saved = true; save(); $('showMsg').textContent = msg; };
+  try {
+    if (navigator.canShare && navigator.canShare({files: [file]})){ await navigator.share({files: [file], title: 'My live show'}); return saved('Sent! Your video is wherever you shared it.'); }
+  } catch (e){ if (e && e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = LIVE.url; a.download = name; document.body.append(a); a.click(); a.remove();
+  saved(`Saved to your Downloads folder as ${name}.`);
+};
+$('bShowBin').onclick = closeShow;
+$('bLiveExit').onclick = exitLive;
+$('bGoLive').onclick = goLive;
+$('bGoLive2').onclick = goLive;
+
+// what the camera canvas shows (and records)
+function drawStage(){
+  const cv = $('stageCv'), g = cv.getContext('2d'), W = cv.width, H = cv.height, v = LIVE.video;
+  g.fillStyle = '#0F0B16'; g.fillRect(0, 0, W, H);
+  if (v && v.videoWidth){
+    const sc = Math.max(W / v.videoWidth, H / v.videoHeight), w = v.videoWidth * sc, h = v.videoHeight * sc;
+    g.save(); g.translate(W, 0); g.scale(-1, 1); g.drawImage(v, (W - w) / 2, (H - h) / 2, w, h); g.restore();   // mirrored, like a selfie
+  }
+  // top banner: the venue and the song
+  g.fillStyle = 'rgba(15,11,22,0.6)'; g.fillRect(0, 0, W, 122);
+  g.textBaseline = 'alphabetic'; g.textAlign = 'left';
+  g.fillStyle = '#FF4D8D'; g.font = '400 50px Anton, "Arial Narrow", sans-serif';
+  g.fillText(`LIVE AT THE ${VENUES[venueIndex(TOUR().fans)].name.toUpperCase()}`, 28, 66);
+  g.fillStyle = '#F5F0FA'; g.font = '600 26px Archivo, system-ui, sans-serif';
+  let sub = `${TOUR().name} · ${song().name}`;
+  if (g.measureText(sub).width > W - 300){ while (sub.length > 4 && g.measureText(sub + '…').width > W - 300) sub = sub.slice(0, -1); sub = sub.trimEnd() + '…'; }
+  g.fillText(sub, 28, 104);
+  if (LIVE.rec){
+    const secs = Math.floor((performance.now() - LIVE.t0) / 1000);
+    g.fillStyle = Math.floor(performance.now() / 500) % 2 ? '#FF3B3B' : 'rgba(255,59,59,0.35)';
+    g.beginPath(); g.arc(W - 214, 98, 11, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#F5F0FA'; g.font = '700 26px "JetBrains Mono", monospace'; g.textAlign = 'right';
+    g.fillText(`REC ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`, W - 28, 108);
+  }
+  // the lane along the bottom, the chord above it
+  const lane = $('lane'), lh = lane.width ? Math.round(W * lane.height / lane.width) : 0;
+  if (lh){ g.fillStyle = 'rgba(15,11,22,0.65)'; g.fillRect(0, H - lh, W, lh); g.drawImage(lane, 0, H - lh, W, lh); }
+  g.shadowColor = 'rgba(0,0,0,0.7)'; g.shadowBlur = 12;
+  g.textAlign = 'left'; g.fillStyle = '#F5F0FA'; g.font = '400 130px Anton, "Arial Narrow", sans-serif';
+  if (T.running) g.fillText($('pName').textContent, 28, H - lh - 28);
+  if (T.running && T.combo > 1){ g.textAlign = 'right'; g.fillStyle = '#FFB547'; g.font = '400 76px Anton, "Arial Narrow", sans-serif'; g.fillText(`×${T.combo}`, W - 28, H - lh - 34); }
+  const ly = $('pLyric').hidden ? '' : $('pLyr').textContent.trim();
+  if (T.running && ly){ g.textAlign = 'center'; g.fillStyle = '#F5F0FA'; g.font = '700 34px Archivo, system-ui, sans-serif'; g.fillText(ly.slice(0, 40), W / 2, H - lh - 190); }
+  if (LIVE.tail){ g.textAlign = 'center'; g.fillStyle = '#FFB547'; g.font = '400 120px Anton, "Arial Narrow", sans-serif'; g.fillText('THANK YOU!', W / 2, H / 2); }
+  g.shadowBlur = 0; g.textAlign = 'left';
+}
+
+// the Tour tab's Live shows card
+function renderLive(){
+  const shows = state.shows || [], unlocked = liveUnlocked();
+  $('bGoLive').disabled = !unlocked;
+  $('liveInfo').textContent = unlocked
+    ? 'Film yourself playing a song with the band and a crowd. The video stays on your phone until you save or share it.'
+    : `Unlocks at the Open Mic: ${fmt(Math.max(0, VENUES[2].fans - TOUR().fans))} more fans to go.`;
+  $('showList').innerHTML = shows.slice(-8).reverse().map(p =>
+    `<li><b>#${p.n}</b> ${esc(p.song)} <span>${new Date(p.date + 'T12:00').toLocaleDateString(undefined, {day: 'numeric', month: 'short'})} · ${p.venue}${p.onTime != null ? ` · ${p.onTime}% on time` : ''} · combo ×${p.combo}</span></li>`).join('');
+  const timed = shows.filter(p => p.onTime != null);
+  $('showTrend').textContent = timed.length >= 2 ? `First show: ${timed[0].onTime}% on time. Latest: ${timed[timed.length - 1].onTime}%.` : '';
 }
 
 /* ---------- wiring ---------- */

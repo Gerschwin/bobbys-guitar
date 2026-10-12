@@ -23,6 +23,8 @@ To run it locally (the microphone needs `localhost` or HTTPS):
 
 ## Credits
 
+Crowd sounds (live shows): applause and cheering from [BigSoundBank](https://bigsoundbank.com), CC0 (public domain).
+
 Guitar samples: steel-string acoustic guitar from the FluidR3 GM soundfont by Frank Wen, licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/), via [gleitz/midi-js-soundfonts](https://github.com/gleitz/midi-js-soundfonts).
 
 ## Adding songs
