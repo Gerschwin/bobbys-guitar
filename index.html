@@ -253,10 +253,13 @@ select option,select optgroup{background:var(--surface);color:var(--ink)}
 .devtag{font:700 .6rem var(--f-mono);letter-spacing:.1em;color:#0F0B16;background:var(--pulse);border-radius:6px;padding:2px 5px;margin-left:6px;vertical-align:middle}
 .devcard{border:2px dashed var(--pulse)}
 .devtoast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-weight:700;max-width:90vw;text-align:center}
-/* v0.17.2: the version sits on its own line under the name, so larger phone text sizes can't push it under the buttons */
-.top .brand{display:flex;flex-direction:column;align-items:flex-start;gap:3px;line-height:1;overflow:visible}
+/* v0.17.3: the version lives on the Help page; the header is just the name and buttons */
 .top .brand .bname{white-space:nowrap}
-.top .ver{font-size:.62rem;align-self:flex-start}
+.helpver{display:flex;align-items:center;gap:8px;margin:0;color:var(--muted);font-size:.9rem}
+.helpver .ver{font:500 .8rem var(--f-mono);color:var(--muted)}
+.helpver .ver.vertest{background:var(--pulse);color:#0F0B16;border-radius:6px;padding:2px 6px;font-weight:700}
+.helpbtn{position:relative}
+.helpbtn.testdot::after{content:"";position:absolute;top:1px;right:1px;width:10px;height:10px;border-radius:50%;background:var(--pulse);border:2px solid var(--bg)}
 /* v0.17.0: help */
 .topright{display:flex;align-items:center;gap:8px;flex:none}
 .helpbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 1rem var(--f-body);display:grid;place-items:center}
@@ -439,7 +442,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
 
 <div class="app">
   <header class="top">
-    <div class="brand"><span class="bname">BOBBY’S GUITAR</span><span class="ver" id="ver"></span><!-- TEST-MODE-START --><span class="devtag" id="devTag" hidden>TEST</span><!-- TEST-MODE-END --></div>
+    <div class="brand"><span class="bname">BOBBY’S GUITAR</span><!-- TEST-MODE-START --><span class="devtag" id="devTag" hidden>TEST</span><!-- TEST-MODE-END --></div>
     <div class="topright"><button class="helpbtn" id="bHelp" aria-label="Help">?</button>
     <button class="streak" id="streakChip" aria-label="Tour days in a row">
       <svg viewBox="0 0 24 24" fill="none" stroke="var(--pulse)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5 1-8.5z"/></svg>
@@ -491,7 +494,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
       <div class="row"><button class="small" id="devBackupDue">Make backup reminder due</button><button class="small" id="devHistory">Add 10 days of practice</button></div>
       <div class="row"><button class="small" id="devConfetti">Fire the confetti</button><button class="small" id="devStrum">Test strum on Chords</button></div>
       <div class="row"><button class="small" id="devReset">Reset progress</button><button class="small" id="devWipe">Clear ALL data</button><button class="small" id="devOff">Turn test mode off</button></div>
-      <p class="hint">Tap the version number 5 times to switch test mode on or off. Not included in 1.0 release builds.</p>
+      <p class="hint">Tap the version number on the Help page 5 times to switch test mode on or off. Not included in 1.0 release builds.</p>
     </section>
     <!-- TEST-MODE-END -->
     <section class="card">
@@ -649,6 +652,7 @@ h1.hit,.pinfo h2.hit{color:var(--good);animation:hitpop .55s ease}
 
   <div class="view" id="viewHelp" hidden>
     <div class="helphead"><button class="small" id="helpBack">‹ Back</button><h2 class="etitle">Help</h2></div>
+    <p class="helpver">Bobby’s Guitar <span class="ver" id="ver"></span></p>
     <input type="search" id="helpSearch" class="helpsearch" placeholder="Search help, e.g. timing, mic, capo" aria-label="Search help">
     <div class="helplist" id="helpList"></div>
     <p class="hint" id="helpNone" hidden>Nothing matches. Try a simpler word, like “mic” or “timing”.</p>
@@ -1005,7 +1009,7 @@ function strumDirection(x, sr){
 // DSP-END
 
 // Bump this with every change so it's easy to tell which version is loaded.
-const APP_VERSION = '0.17.2';
+const APP_VERSION = '0.17.3';
 let templates = buildTemplates();
 const $ = id => document.getElementById(id);
 const STR_NAMES = ['E','A','D','G','B','e'];
@@ -3368,7 +3372,8 @@ function devToast(t){
   el.textContent = t; el.hidden = false; clearTimeout(el._t); el._t = setTimeout(() => el.hidden = true, 2600);
 }
 function renderDev(){
-  $('devTag').hidden = true; $('ver').classList.toggle('vertest', !!state.dev);   // test mode: the version number turns into a yellow pill (no extra width)
+  $('devTag').hidden = true; $('ver').classList.toggle('vertest', !!state.dev);   // test mode: the version (on the Help page) turns into a yellow pill
+  $('bHelp').classList.toggle('testdot', !!state.dev);                              // and the header's ? button gets a yellow dot
   $('ver').title = state.dev ? 'Test mode is on' : '';
   $('devCard').hidden = !state.dev;
   if (!state.dev) return;
@@ -3425,7 +3430,7 @@ const HELP = [
     <li><b>Allow the microphone</b> when it asks. That’s how it hears your guitar. Nothing is recorded or sent anywhere.</li>
     <li><b>Put the phone close:</b> about an arm’s length away, with the bottom edge (where the mic is) facing the guitar. A quiet room helps.</li>
     <li><b>Tune up</b> in Practice → Tuner, then run <b>Calibrate timing</b> once in Play along.</li></ol>
-    <p>Updates arrive by themselves: close the app fully and open it again while online. The version number is at the top of the screen.</p>`],
+    <p>Updates arrive by themselves: close the app fully and open it again while online. The version number is at the top of this Help page.</p>`],
   ['diagram', 'Reading a chord diagram', `
     <ul><li>The six up-and-down lines are the strings: <b>low E on the left</b> (the thickest) to <b>high e on the right</b>. Left-handed mode flips it.</li>
     <li>The lines across are the frets. The thick bar at the top is the nut, the end of the neck.</li>
@@ -3501,7 +3506,7 @@ const HELP = [
     <li><b>My timing is always late or early:</b> run Calibrate timing again.</li>
     <li><b>The band makes it miss my chords:</b> turn the volume down or use headphones.</li>
     <li><b>The live video is jerky:</b> switch the look to Stage lights.</li>
-    <li><b>An update isn’t showing:</b> close the app fully and open it again while online, then check the version number at the top.</li>
+    <li><b>An update isn’t showing:</b> close the app fully and open it again while online, then check the version number at the top of Help.</li>
     <li><b>Something seems stuck:</b> close the app and open it again.</li></ul>`],
 ];
 let helpFrom = 'tour';
